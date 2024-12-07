@@ -25,12 +25,12 @@ const CurveModel = () => {
         }
 
         child.material.emissive = new THREE.Color("orange");
-        child.material.emissiveIntensity = 1.5;
+        child.material.emissiveIntensity = 2;
         child.material.needsUpdate = true;
       }
     });
   }, [scene]);
-  return <primitive object={scene} scale={1.5} position={[0, 0, 0]} />;
+  return <primitive object={scene} scale={0.75} position={[0, 0, 0]} />;
 };
 
 const Ground = (props) => {
@@ -39,7 +39,7 @@ const Ground = (props) => {
     "/textures/normal.jpg",
   ]);
   return (
-    <Reflector resolution={512} args={[15, 15]} {...props}>
+    <Reflector resolution={512} args={[9, 15]} {...props}>
       {(Material, props) => (
         <Material
           color={"#fff"}
@@ -82,7 +82,7 @@ const App = () => {
       <CurveModel />
 
       {/* Backdrop */}
-      <Backdrop floor={2} position={[0, -0.5, -2]} scale={[30, 10, 5]}>
+      <Backdrop floor={2} position={[0, -0.5, -4.75]} scale={[30, 10, 5]}>
         <meshStandardMaterial color="#121316" envMapIntensity={0.1} />
       </Backdrop>
 
