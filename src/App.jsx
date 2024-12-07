@@ -7,6 +7,7 @@ import {
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
+import { folder, useControls } from "leva";
 import { KernelSize } from "postprocessing";
 import { Perf } from "r3f-perf";
 import { useEffect, useRef } from "react";
@@ -30,23 +31,35 @@ const CurveModel = () => {
       }
     });
   }, [scene]);
-  return <primitive object={scene} scale={0.75} position={[0, 0, 0]} />;
+  return <primitive object={scene} scale={1} position={[0, 0, 0]} />;
 };
 
 const Ground = (props) => {
+  const { resolution, scaleX, scaleY, metalness, normalScaleX, normalScaleY } =
+    useControls({
+      reflector: folder({
+        resolution: { value: 512, min: 256, max: 1024, step: 100 },
+        scaleX: { value: 9, min: 1, max: 20, step: 0.01 },
+        scaleY: { value: 15, min: 1, max: 20, step: 0.01 },
+        metalness: { value: 0.1, min: 0, max: 1, step: 0.01 },
+        normalScaleX: { value: 2, min: 1, max: 5, step: 0.01 },
+        normalScaleY: { value: 2, min: 1, max: 5, step: 0.01 },
+      }),
+    });
+
   const [floor, normal] = useTexture([
     "/textures/color.jpg",
     "/textures/normal.jpg",
   ]);
   return (
-    <Reflector resolution={512} args={[9, 15]} {...props}>
+    <Reflector resolution={resolution} args={[scaleX, scaleY]} {...props}>
       {(Material, props) => (
         <Material
           color={"#fff"}
-          metalness={0.1}
+          metalness={metalness}
           roughnessMap={floor}
           normalMap={normal}
-          normalScale={[2, 2]}
+          normalScale={[normalScaleX, normalScaleY]}
           {...props}
         />
       )}
@@ -81,6 +94,46 @@ const Parallax = ({ children }) => {
 };
 
 const App = () => {
+  const {
+    fogColor,
+    fogNear,
+    fogFar,
+    ambientLightIntensity,
+    luminanceThreshold1,
+    intensity1,
+    luminanceThreshold2,
+    intensity2,
+    backDropPositionX,
+    backDropPositionY,
+    backDropPositionZ,
+    backDropScaleX,
+    backDropScaleY,
+    backDropScaleZ,
+    backdropColor,
+  } = useControls({
+    scene: folder({
+      fogColor: { value: "#522d17" },
+      fogNear: { value: 6, min: 1, max: 10, step: 0.01 },
+      fogFar: { value: 20, min: 1, max: 50, step: 0.01 },
+      ambientLightIntensity: { value: 1, min: 0, max: 5, step: 0.01 },
+    }),
+    bloom: folder({
+      luminanceThreshold1: { value: 0.2, min: 0, max: 1, step: 0.001 },
+      intensity1: { value: 0.5, min: 0, max: 1, step: 0.001 },
+      luminanceThreshold2: { value: 0, min: 0, max: 1, step: 0.001 },
+      intensity2: { value: 0.5, min: 0, max: 1, step: 0.001 },
+    }),
+    backDrop: folder({
+      backDropPositionX: { value: 0, min: 0, max: 10, step: 0.001 },
+      backDropPositionY: { value: -0.5, min: -2, max: 2, step: 0.001 },
+      backDropPositionZ: { value: -4.75, min: -5, max: 5, step: 0.001 },
+      backDropScaleX: { value: 50, min: 0, max: 100, step: 0.001 },
+      backDropScaleY: { value: 10, min: 0, max: 50, step: 0.001 },
+      backDropScaleZ: { value: 5, min: 0, max: 10, step: 0.001 },
+      backdropColor: { value: "#121316" },
+    }),
+  });
+
   return (
     <Canvas dpr={[1, 1.5]}>
       {/* Setup */}
@@ -89,18 +142,18 @@ const App = () => {
       <OrbitControls />
 
       {/* Light */}
-      <ambientLight />
-      <fog attach="fog" args={["#522d17", 6, 20]} />
+      <ambientLight ambientLightIntensity={ambientLightIntensity} />
+      <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
       <EffectComposer multisampling={2}>
         <Bloom
           kernelSize={KernelSize.SMALL}
-          luminanceThreshold={0.2}
-          intensity={0.5}
+          luminanceThreshold={luminanceThreshold1}
+          intensity={intensity1}
         />
         <Bloom
           kernelSize={KernelSize.HUGE}
-          luminanceThreshold={0}
-          intensity={0.5}
+          luminanceThreshold={luminanceThreshold2}
+          intensity={intensity2}
         />
       </EffectComposer>
 
@@ -110,8 +163,12 @@ const App = () => {
         <CurveModel />
 
         {/* Backdrop */}
-        <Backdrop floor={2} position={[0, -0.5, -4.75]} scale={[50, 10, 5]}>
-          <meshStandardMaterial color="#121316" envMapIntensity={0.1} />
+        <Backdrop
+          floor={2}
+          position={[backDropPositionX, backDropPositionY, backDropPositionZ]}
+          scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+        >
+          <meshStandardMaterial color={backdropColor} envMapIntensity={0.1} />
         </Backdrop>
       </Parallax>
 
