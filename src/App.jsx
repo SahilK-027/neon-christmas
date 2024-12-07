@@ -56,21 +56,24 @@ const Ground = (props) => {
 
 const Parallax = ({ children }) => {
   const ref = useRef();
-  const vec = new THREE.Vector3();
+  const vec3 = new THREE.Vector3();
   const { camera, mouse } = useThree();
 
   useFrame(() => {
-    camera.position.lerp(vec.set(mouse.x * 0.05, 0, 3.0), 0.05);
+    // Camera position should get smoothly set according to mouse position
+    camera.position.lerp(vec3.set(mouse.x * 0.05, 0, 3.0), 0.05);
 
+    // Objects within parallax
     ref.current.position.lerp(
-      vec.set(-mouse.x * 0.75, -mouse.y * 0.1, 0),
+      vec3.set(-1 * mouse.x * 0.75, -1 * mouse.y * 0.1, 0),
       0.05
     );
 
+    // Rotate objects within parallax
     ref.current.rotation.y = THREE.MathUtils.lerp(
       ref.current.rotation.y,
-      (-mouse.x * Math.PI) / 20,
-      0.05
+      (-1 * mouse.x * Math.PI) / 20,
+      0
     );
   });
 
@@ -101,8 +104,9 @@ const App = () => {
         />
       </EffectComposer>
 
-      {/* Model */}
+      {/* Parallax effect */}
       <Parallax>
+        {/* Model */}
         <CurveModel />
 
         {/* Backdrop */}
