@@ -1,4 +1,10 @@
-import { Backdrop, OrbitControls, useGLTF } from "@react-three/drei";
+import {
+  Backdrop,
+  OrbitControls,
+  Reflector,
+  useGLTF,
+  useTexture,
+} from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { KernelSize } from "postprocessing";
@@ -27,6 +33,27 @@ const CurveModel = () => {
   return <primitive object={scene} scale={1.5} position={[0, 0, 0]} />;
 };
 
+const Ground = (props) => {
+  const [floor, normal] = useTexture([
+    "/textures/color.jpg",
+    "/textures/normal.jpg",
+  ]);
+  return (
+    <Reflector resolution={512} args={[15, 15]} {...props}>
+      {(Material, props) => (
+        <Material
+          color={"#fff"}
+          metalness={0.1}
+          roughnessMap={floor}
+          normalMap={normal}
+          normalScale={[2, 2]}
+          {...props}
+        />
+      )}
+    </Reflector>
+  );
+};
+
 const App = () => {
   return (
     <Canvas dpr={[1, 1.5]}>
@@ -37,7 +64,7 @@ const App = () => {
 
       {/* Light */}
       <ambientLight />
-
+      <fog attach="fog" args={["#522d17", 6, 20]} />
       <EffectComposer multisampling={2}>
         <Bloom
           kernelSize={KernelSize.SMALL}
@@ -53,10 +80,21 @@ const App = () => {
 
       {/* Model */}
       <CurveModel />
+
       {/* Backdrop */}
       <Backdrop floor={2} position={[0, -0.5, -2]} scale={[30, 10, 5]}>
         <meshStandardMaterial color="#121316" envMapIntensity={0.1} />
       </Backdrop>
+
+      {/* Ground */}
+      <Ground
+        mirror={1}
+        blur={[100, 50]}
+        mixBlur={12}
+        mixStrength={1.5}
+        rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+        position={[0, -0.4, 0]}
+      />
     </Canvas>
   );
 };
