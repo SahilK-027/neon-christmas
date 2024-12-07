@@ -5,11 +5,11 @@ import {
   useGLTF,
   useTexture,
 } from "@react-three/drei";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { KernelSize } from "postprocessing";
 import { Perf } from "r3f-perf";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 const CurveModel = () => {
@@ -54,6 +54,29 @@ const Ground = (props) => {
   );
 };
 
+const Parallax = ({ children }) => {
+  const ref = useRef();
+  const vec = new THREE.Vector3();
+  const { camera, mouse } = useThree();
+
+  useFrame(() => {
+    camera.position.lerp(vec.set(mouse.x * 0.05, 0, 3.0), 0.05);
+
+    ref.current.position.lerp(
+      vec.set(-mouse.x * 0.75, -mouse.y * 0.1, 0),
+      0.05
+    );
+
+    ref.current.rotation.y = THREE.MathUtils.lerp(
+      ref.current.rotation.y,
+      (-mouse.x * Math.PI) / 20,
+      0.05
+    );
+  });
+
+  return <group ref={ref}>{children}</group>;
+};
+
 const App = () => {
   return (
     <Canvas dpr={[1, 1.5]}>
@@ -79,12 +102,14 @@ const App = () => {
       </EffectComposer>
 
       {/* Model */}
-      <CurveModel />
+      <Parallax>
+        <CurveModel />
 
-      {/* Backdrop */}
-      <Backdrop floor={2} position={[0, -0.5, -4.75]} scale={[30, 10, 5]}>
-        <meshStandardMaterial color="#121316" envMapIntensity={0.1} />
-      </Backdrop>
+        {/* Backdrop */}
+        <Backdrop floor={2} position={[0, -0.5, -4.75]} scale={[50, 10, 5]}>
+          <meshStandardMaterial color="#121316" envMapIntensity={0.1} />
+        </Backdrop>
+      </Parallax>
 
       {/* Ground */}
       <Ground
