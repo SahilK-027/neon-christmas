@@ -55,7 +55,7 @@ const CurveModel = () => {
 
     void main(){
         float wave = sin(vPosition.y * 2.0 + uTime * 2.0) * 0.5 + 0.5;
-        float pulse = abs(sin(uTime * 2.0)) * 0.5 + 0.5;
+        float pulse = abs(sin(uTime * 2.0)) * 0.5 + 1.0;
         vec3 color = mix(uColor1, uColor2, wave) * pulse * uIntensity;
         gl_FragColor = vec4(color, 1.0);
     }
