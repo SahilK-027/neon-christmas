@@ -92,7 +92,7 @@ const CurveModel = () => {
     intensityC3,
   ]);
 
-  const { scene } = useGLTF("/models/birth.glb");
+  const { scene } = useGLTF("/models/birth2.glb");
 
   useFrame((_, delta) => {
     Object.values(shaders).forEach((shader) => {
@@ -138,25 +138,25 @@ const Ground = (props) => {
     normalScaleY,
   } = useControls({
     reflector: folder({
-      resolution: { value: 256, min: 256, max: 1024, step: 100 },
+      resolution: { value: 512, min: 256, max: 1024, step: 100 },
       scaleX: { value: 9, min: 1, max: 20, step: 0.01 },
       scaleY: { value: 15, min: 1, max: 20, step: 0.01 },
-      metalness: { value: 0.1, min: 0, max: 1, step: 0.01 },
-      roughness: { value: 10, min: 0, max: 20, step: 0.01 },
+      metalness: { value: 0.4, min: 0, max: 1, step: 0.01 },
+      roughness: { value: 5.0, min: 0, max: 20, step: 0.01 },
       normalScaleX: { value: 2, min: 1, max: 5, step: 0.01 },
       normalScaleY: { value: 2, min: 1, max: 5, step: 0.01 },
     }),
   });
 
   const [floor, normal] = useTexture([
-    "/textures/color3.jpg",
-    "/textures/normal3.jpg",
+    "/textures/color4.jpg",
+    "/textures/normal4.jpg",
   ]);
   return (
     <Reflector resolution={resolution} args={[scaleX, scaleY]} {...props}>
       {(Material, props) => (
         <Material
-          color={"#fff"}
+          color={"#a0a0a0"}
           metalness={metalness}
           roughness={roughness}
           roughnessMap={floor}
@@ -180,7 +180,7 @@ const Parallax = ({ children }) => {
 
     // Objects within parallax
     ref.current.position.lerp(
-      vec3.set(-1 * mouse.x * 0.75, -1 * mouse.y * 0.1, 0),
+      vec3.set(-1 * mouse.x * 0.75, -1 * mouse.y * 0.05, 0),
       0.05
     );
 
@@ -287,7 +287,7 @@ const Experience = () => {
           {/* Ground */}
           <Ground
             mirror={1}
-            blur={[100, 50]}
+            blur={[400, 100]}
             mixBlur={12}
             mixStrength={1.5}
             rotation={[-Math.PI / 2, 0, Math.PI / 2]}
