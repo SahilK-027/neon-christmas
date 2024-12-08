@@ -10,54 +10,120 @@ import { Bloom, EffectComposer } from "@react-three/postprocessing";
 import { folder, Leva, useControls } from "leva";
 import { KernelSize } from "postprocessing";
 import { Perf } from "r3f-perf";
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 
 const CurveModel = () => {
-  const { colorC1, colorC2, colorC3, intensityC1, intensityC2, intensityC3 } =
-    useControls({
-      birthModel: folder({
-        colorC1: { value: "#7141cb" },
-        colorC2: { value: "#548aff" },
-        colorC3: { value: "#f8f7bd" },
-        intensityC1: { value: 5, min: 0, max: 5, step: 0.01 },
-        intensityC2: { value: 3, min: 0, max: 5, step: 0.01 },
-        intensityC3: { value: 1, min: 0, max: 5, step: 0.01 },
-      }),
+  const {
+    colorC1_a,
+    colorC1_b,
+    colorC2_a,
+    colorC2_b,
+    colorC3_a,
+    colorC3_b,
+    intensityC1,
+    intensityC2,
+    intensityC3,
+  } = useControls({
+    birthModel: folder({
+      colorC1_a: { value: "#308bff" },
+      colorC1_b: { value: "#4d35c4" },
+      colorC2_a: { value: "#ff0662" },
+      colorC2_b: { value: "#ffbd41" },
+      colorC3_a: { value: "pink" },
+      colorC3_b: { value: "#f75eff" },
+      intensityC1: { value: 2, min: 0, max: 5, step: 0.01 },
+      intensityC2: { value: 1.5, min: 0, max: 5, step: 0.01 },
+      intensityC3: { value: 1, min: 0, max: 5, step: 0.01 },
+    }),
+  });
+  // Shaders
+  const vertexShader = `
+    varying vec3 vPosition;
+    void main(){
+        vPosition = position;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    }
+  `;
+  const fragmentShader = `
+    uniform vec3 uColor1;
+    uniform vec3 uColor2;
+    uniform float uTime;
+    uniform float uIntensity;
+
+    varying vec3 vPosition;
+
+    void main(){
+        float wave = sin(vPosition.y * 2.0 + uTime * 2.0) * 0.5 + 0.5;
+        float pulse = abs(sin(uTime * 2.0)) * 0.5 + 0.5;
+        vec3 color = mix(uColor1, uColor2, wave) * pulse * uIntensity;
+        gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+
+  const createShaderMaterial = (color1, color2, intensity) => {
+    return new THREE.ShaderMaterial({
+      vertexShader,
+      fragmentShader,
+      uniforms: {
+        uTime: { value: 0 },
+        uColor1: { value: new THREE.Color(color1) },
+        uColor2: { value: new THREE.Color(color2) },
+        uIntensity: { value: intensity },
+      },
     });
+  };
+
+  const shaders = useMemo(() => {
+    return {
+      c1: createShaderMaterial(colorC1_a, colorC1_b, intensityC1),
+      c2: createShaderMaterial(colorC2_a, colorC2_b, intensityC2),
+      c3: createShaderMaterial(colorC3_a, colorC3_b, intensityC3),
+    };
+  }, [
+    colorC1_a,
+    colorC1_b,
+    intensityC1,
+    colorC2_a,
+    colorC2_b,
+    intensityC2,
+    colorC3_a,
+    colorC3_b,
+    intensityC3,
+  ]);
+
   const { scene } = useGLTF("/models/birth.glb");
+
+  useFrame((_, delta) => {
+    Object.values(shaders).forEach((shader) => {
+      shader.uniforms.uTime.value += delta;
+    });
+  });
+
   useEffect(() => {
     scene.traverse((child) => {
       if (child.isMesh) {
-        if (!(child.material instanceof THREE.MeshStandardMaterial)) {
-          child.material = new THREE.MeshStandardMaterial({
-            color: child.material.color,
-            map: child.material.map,
-          });
-        }
-
-        const material = child.material.clone();
+        let material = null;
 
         switch (child.name) {
           case "c1":
-            material.emissive = new THREE.Color(colorC1);
-            material.emissiveIntensity = intensityC1;
+            material = shaders.c1;
             break;
           case "c2":
-            material.emissive = new THREE.Color(colorC2);
-            material.emissiveIntensity = intensityC2;
+            material = shaders.c2;
             break;
           case "c3":
-            material.emissive = new THREE.Color(colorC3);
-            material.emissiveIntensity = intensityC3;
+            material = shaders.c3;
             break;
         }
 
-        child.material = material;
-        child.material.needsUpdate = true;
+        if (material) {
+          child.material = material;
+          child.material.needsUpdate = true;
+        }
       }
     });
-  }, [scene, colorC1, colorC2, colorC3, intensityC1, intensityC2, intensityC3]);
+  }, [scene, shaders]);
   return <primitive object={scene} scale={1} position={[0, 0, 0]} />;
 };
 
@@ -72,7 +138,7 @@ const Ground = (props) => {
     normalScaleY,
   } = useControls({
     reflector: folder({
-      resolution: { value: 512, min: 256, max: 1024, step: 100 },
+      resolution: { value: 256, min: 256, max: 1024, step: 100 },
       scaleX: { value: 9, min: 1, max: 20, step: 0.01 },
       scaleY: { value: 15, min: 1, max: 20, step: 0.01 },
       metalness: { value: 0.1, min: 0, max: 1, step: 0.01 },
