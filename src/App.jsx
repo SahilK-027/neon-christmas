@@ -7,7 +7,7 @@ import {
 } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Bloom, EffectComposer } from "@react-three/postprocessing";
-import { folder, useControls } from "leva";
+import { folder, Leva, useControls } from "leva";
 import { KernelSize } from "postprocessing";
 import { Perf } from "r3f-perf";
 import { useEffect, useRef } from "react";
@@ -135,53 +135,56 @@ const App = () => {
   });
 
   return (
-    <Canvas dpr={[1, 1.5]}>
-      {/* Setup */}
-      <Perf position="top-left" />
-      <color attach="background" args={["#121316"]} />
-      <OrbitControls />
+    <>
+      <Leva collapsed />
+      <Canvas dpr={[1, 1.5]}>
+        {/* Setup */}
+        <Perf position="top-left" />
+        <color attach="background" args={["#121316"]} />
+        <OrbitControls />
 
-      {/* Light */}
-      <ambientLight ambientLightIntensity={ambientLightIntensity} />
-      <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
-      <EffectComposer multisampling={2}>
-        <Bloom
-          kernelSize={KernelSize.SMALL}
-          luminanceThreshold={luminanceThreshold1}
-          intensity={intensity1}
+        {/* Light */}
+        <ambientLight ambientLightIntensity={ambientLightIntensity} />
+        <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
+        <EffectComposer multisampling={2}>
+          <Bloom
+            kernelSize={KernelSize.SMALL}
+            luminanceThreshold={luminanceThreshold1}
+            intensity={intensity1}
+          />
+          <Bloom
+            kernelSize={KernelSize.HUGE}
+            luminanceThreshold={luminanceThreshold2}
+            intensity={intensity2}
+          />
+        </EffectComposer>
+
+        {/* Parallax effect */}
+        <Parallax>
+          {/* Model */}
+          <CurveModel />
+
+          {/* Backdrop */}
+          <Backdrop
+            floor={2}
+            position={[backDropPositionX, backDropPositionY, backDropPositionZ]}
+            scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+          >
+            <meshStandardMaterial color={backdropColor} envMapIntensity={0.1} />
+          </Backdrop>
+        </Parallax>
+
+        {/* Ground */}
+        <Ground
+          mirror={1}
+          blur={[100, 50]}
+          mixBlur={12}
+          mixStrength={1.5}
+          rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+          position={[0, -0.4, 0]}
         />
-        <Bloom
-          kernelSize={KernelSize.HUGE}
-          luminanceThreshold={luminanceThreshold2}
-          intensity={intensity2}
-        />
-      </EffectComposer>
-
-      {/* Parallax effect */}
-      <Parallax>
-        {/* Model */}
-        <CurveModel />
-
-        {/* Backdrop */}
-        <Backdrop
-          floor={2}
-          position={[backDropPositionX, backDropPositionY, backDropPositionZ]}
-          scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
-        >
-          <meshStandardMaterial color={backdropColor} envMapIntensity={0.1} />
-        </Backdrop>
-      </Parallax>
-
-      {/* Ground */}
-      <Ground
-        mirror={1}
-        blur={[100, 50]}
-        mixBlur={12}
-        mixStrength={1.5}
-        rotation={[-Math.PI / 2, 0, Math.PI / 2]}
-        position={[0, -0.4, 0]}
-      />
-    </Canvas>
+      </Canvas>
+    </>
   );
 };
 
