@@ -39,25 +39,49 @@ const CurveModel = () => {
   });
   // Shaders
   const vertexShader = `
+    uniform vec3 uMouseWorld;
+    uniform float uTime;
+    
     varying vec3 vPosition;
-    void main(){
-        vPosition = position;
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    varying float vDistanceToMouse;
+
+    void main() {
+	    // Calculate distance to mouse
+	    vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+	    float distanceToMouse = distance(worldPosition, uMouseWorld);
+      
+	    // fallOff calculation
+	    float falloff = 1.0 - smoothstep(0.0, 0.6, distanceToMouse);
+	    falloff = pow(falloff, 2.0); // Smooth quadratic falloff
+      
+	    // Deform model based on mouse contact position
+	    vec3 deformDirection = normalize(worldPosition - uMouseWorld);
+	    vec3 newPosition = position + deformDirection * sin(distanceToMouse * 10.0 - uTime * 3.0) *  0.1 * falloff * 0.5;
+
+	    vPosition = newPosition;
+	    vDistanceToMouse = distanceToMouse;
+      
+	    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
     }
   `;
   const fragmentShader = `
-    uniform vec3 uColor1;
+  uniform vec3 uColor1;
     uniform vec3 uColor2;
     uniform float uTime;
     uniform float uIntensity;
 
     varying vec3 vPosition;
+    varying float vDistanceToMouse;
 
-    void main(){
-        float wave = sin(vPosition.y * 2.0 + uTime * 2.0) * 0.5 + 0.5;
-        float pulse = abs(sin(uTime * 2.0)) * 0.5 + 1.0;
-        vec3 color = mix(uColor1, uColor2, wave) * pulse * uIntensity;
-        gl_FragColor = vec4(color, 1.0);
+    void main() {
+	    float wave = sin(vPosition.y * 3.0 + uTime * 2.5) * 0.5 + 0.5;
+	    float pulse = pow(abs(sin(uTime * 1.5)), 2.0) * 0.3 + 0.7;
+      
+	    // Change the color based on vDistanceToMouse
+	    float distanceFactor = 1.0 - smoothstep(0.0, 0.5, vDistanceToMouse);
+      
+	    vec3 color = mix(uColor1, uColor2, wave) * pulse * uIntensity * (1.0 + distanceFactor * 0.3);
+	    gl_FragColor = vec4(color, 1.0);
     }
   `;
 
@@ -70,6 +94,7 @@ const CurveModel = () => {
         uColor1: { value: new THREE.Color(color1) },
         uColor2: { value: new THREE.Color(color2) },
         uIntensity: { value: intensity },
+        uMouseWorld: { value: new THREE.Vector3(0, 0, 0) },
       },
     });
   };
@@ -93,10 +118,40 @@ const CurveModel = () => {
   ]);
 
   const { scene } = useGLTF("/models/birth2.glb");
+  const { camera, gl } = useThree();
+  const mouse = useRef(new THREE.Vector3(0, 0, 0));
+  const smoothMouse = useRef(new THREE.Vector3(0, 0, 0));
+  const rayCaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = -1 * (event.clientY / window.innerHeight) * 2 + 1;
+
+      // Cast a ray to find world position
+      rayCaster.setFromCamera(pointer, camera);
+      const intersect = rayCaster.intersectObject(scene, true);
+
+      if (intersect.length > 0) {
+        mouse.current.copy(intersect[0].point);
+      }
+    };
+
+    gl.domElement.addEventListener("mousemove", handleMouseMove);
+    // unsubscribe
+    return () => {
+      gl.domElement.addEventListener("mousemove", handleMouseMove);
+    };
+  }, [scene, camera, gl]);
 
   useFrame((_, delta) => {
+    // Smooth interpolation for mouse
+    smoothMouse.current.lerp(mouse.current, 0.1);
+
     Object.values(shaders).forEach((shader) => {
       shader.uniforms.uTime.value += delta;
+      shader.uniforms.uMouseWorld.value = smoothMouse.current;
     });
   });
 
