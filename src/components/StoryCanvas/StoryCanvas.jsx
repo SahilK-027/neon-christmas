@@ -15,7 +15,7 @@ import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import NeonModel from "../NeonModel/NeonModel";
 import primitivesData from "../../utils/primitivesData";
 
-const NeonLightsScene = ({ isLoading }) => {
+const StoryCanvas = ({ startStory, startParallax }) => {
   const [currentModel, setCurrentModel] = useState("sphereModel");
   const {
     fogColor,
@@ -59,7 +59,7 @@ const NeonLightsScene = ({ isLoading }) => {
 
   return (
     <>
-      {/* <Story start={!isLoading} /> */}
+      <Story start={startStory} />
       <Leva collapsed />
       <Canvas dpr={[1, 1.5]}>
         {/* Setup */}
@@ -81,7 +81,7 @@ const NeonLightsScene = ({ isLoading }) => {
 
         {/* Parallax effect */}
         <group position={[0, -0.6, 0]}>
-          <Parallax isLoading={isLoading}>
+          <Parallax startParallax={startParallax}>
             {/* Model */}
             <NeonModel
               modelPath={primitivesData[currentModel].path}
@@ -120,4 +120,4 @@ const NeonLightsScene = ({ isLoading }) => {
   );
 };
 
-export default NeonLightsScene;
+export default StoryCanvas;

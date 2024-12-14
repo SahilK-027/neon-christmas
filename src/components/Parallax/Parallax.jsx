@@ -2,13 +2,13 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from 'three';
 
-const Parallax = ({ isLoading, children }) => {
+const Parallax = ({ startParallax, children }) => {
     const ref = useRef();
     const vec3 = new THREE.Vector3();
     const { camera, mouse } = useThree();
 
     useFrame(() => {
-        if (!isLoading) {
+        if (startParallax) {
             // Camera position should get smoothly set according to mouse position
             camera.position.lerp(vec3.set(mouse.x * 0.05, 0, 3.0), 0.05);
 

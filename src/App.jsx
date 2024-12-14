@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
-import NeonLightsScene from "./components/NeonLightsScene/NeonLightsScene";
 import * as THREE from "three";
 import Loader from "./components/Loader/Loader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+import StoryCanvas from "./components/StoryCanvas/StoryCanvas";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +23,7 @@ const App = () => {
         setLoadingProgress(100);
         setTimeout(() => {
           setIsLoading(false);
-        }, 1000)
+        }, 800)
       },
 
       // Progress
@@ -74,7 +74,7 @@ const App = () => {
       >
         <Loader progress={loadingProgress} />
       </animated.div>
-      <NeonLightsScene isLoading={isLoading} />
+      <StoryCanvas startStory={!isLoading} startParallax={!isLoading} />
     </>
   );
 };
