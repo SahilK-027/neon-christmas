@@ -1,0 +1,77 @@
+.progress-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: absolute;
+    width: 100%;
+    margin: 20px 0;
+    bottom: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.progress-line-container {
+    position: absolute;
+    top: 12%;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    width: 75%;
+    height: 4px;
+    transform: translateY(-50%);
+}
+
+.progress-line {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff15;
+    position: absolute;
+}
+
+.progress-indicator {
+    height: 100%;
+    background-color: #ffffff;
+    position: absolute;
+    transition: width 0.3s ease-in-out;
+}
+
+.chapter-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    width: 30%;
+}
+
+.circle {
+    width: 12px;
+    height: 12px;
+    background-color: #ffffff4e;
+    border-radius: 50%;
+    border: 1px solid #ffffff4e;
+    margin-bottom: 8px;
+    pointer-events: all;
+
+    &:hover {
+        cursor: pointer;
+    }
+}
+
+.circle.active {
+    background-color: #ffffff;
+    border-color: #ffffff;
+}
+
+.chapter-label {
+    color: #ffffff9d;
+    font-size: 0.9rem;
+    text-align: center;
+    white-space: nowrap;
+    padding: 10px 0;
+}
+
+.chapter-label.active {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.1rem;
+}

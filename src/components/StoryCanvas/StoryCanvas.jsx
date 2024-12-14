@@ -14,9 +14,10 @@ import Parallax from "../Parallax/Parallax";
 import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import NeonModel from "../NeonModel/NeonModel";
 import primitivesData from "../../utils/primitivesData";
+import StoryProgressBar from "./StoryProgressBar/StoryProgressBar";
 
 const StoryCanvas = ({ startStory, startParallax }) => {
-  const [currentModel, setCurrentModel] = useState("sphereModel");
+  const [currentModel, setCurrentModel] = useState("birthModel");
   const {
     fogColor,
     fogNear,
@@ -116,6 +117,8 @@ const StoryCanvas = ({ startStory, startParallax }) => {
           />
         </group>
       </Canvas>
+
+      <StoryProgressBar />
     </>
   );
 };
