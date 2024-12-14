@@ -12,6 +12,7 @@ import { KernelSize } from "postprocessing";
 import { Perf } from "r3f-perf";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import Story from "./Story/Story";
 
 const CurveModel = () => {
   const {
@@ -295,6 +296,7 @@ const Experience = ({ isLoading }) => {
     <>
       {!isLoading ? (
         <>
+          <Story />
           <Leva collapsed />
           <Canvas dpr={[1, 1.5]}>
             {/* Setup */}
