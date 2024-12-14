@@ -33,7 +33,7 @@ const primitivesData = {
     path: "/models/sphere.glb",
     shaders: {
       curve1: {
-        defaultColorA: "blue",
+        defaultColorA: "#a1ce9e",
         defaultColorB: "teal",
         defaultIntensity: 2
       },
