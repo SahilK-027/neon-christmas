@@ -250,7 +250,7 @@ const Parallax = ({ children }) => {
   return <group ref={ref}>{children}</group>;
 };
 
-const Experience = () => {
+const Experience = ({ isLoading }) => {
   const {
     fogColor,
     fogNear,
@@ -293,63 +293,69 @@ const Experience = () => {
 
   return (
     <>
-      <Leva collapsed />
-      <Canvas dpr={[1, 1.5]}>
-        {/* Setup */}
-        <Perf position="top-left" />
-        <color attach="background" args={["#121316"]} />
-        <OrbitControls />
+      {!isLoading ? (
+        <>
+          <Leva collapsed />
+          <Canvas dpr={[1, 1.5]}>
+            {/* Setup */}
+            <Perf position="top-left" />
+            <color attach="background" args={["#121316"]} />
+            <OrbitControls />
 
-        {/* Light */}
-        <ambientLight ambientLightIntensity={ambientLightIntensity} />
-        <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
-        <EffectComposer multisampling={2}>
-          <Bloom
-            kernelSize={KernelSize.SMALL}
-            luminanceThreshold={luminanceThreshold1}
-            intensity={intensity1}
-          />
-          <Bloom
-            kernelSize={KernelSize.HUGE}
-            luminanceThreshold={luminanceThreshold2}
-            intensity={intensity2}
-          />
-        </EffectComposer>
-
-        {/* Parallax effect */}
-        <group position={[0, -0.6, 0]}>
-          <Parallax>
-            {/* Model */}
-            <CurveModel />
-
-            {/* Backdrop */}
-            <Backdrop
-              floor={2}
-              position={[
-                backDropPositionX,
-                backDropPositionY,
-                backDropPositionZ,
-              ]}
-              scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
-            >
-              <meshStandardMaterial
-                color={backdropColor}
-                envMapIntensity={0.1}
+            {/* Light */}
+            <ambientLight ambientLightIntensity={ambientLightIntensity} />
+            <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
+            <EffectComposer multisampling={2}>
+              <Bloom
+                kernelSize={KernelSize.SMALL}
+                luminanceThreshold={luminanceThreshold1}
+                intensity={intensity1}
               />
-            </Backdrop>
-          </Parallax>
+              <Bloom
+                kernelSize={KernelSize.HUGE}
+                luminanceThreshold={luminanceThreshold2}
+                intensity={intensity2}
+              />
+            </EffectComposer>
 
-          {/* Ground */}
-          <Ground
-            mirror={1}
-            blur={[400, 100]}
-            mixBlur={12}
-            mixStrength={1.5}
-            rotation={[-Math.PI / 2, 0, Math.PI / 2]}
-            position={[0, -0.4, 0]}
-          />
-        </group>
-      </Canvas>
+            {/* Parallax effect */}
+            <group position={[0, -0.6, 0]}>
+              <Parallax>
+                {/* Model */}
+                <CurveModel />
+
+                {/* Backdrop */}
+                <Backdrop
+                  floor={2}
+                  position={[
+                    backDropPositionX,
+                    backDropPositionY,
+                    backDropPositionZ,
+                  ]}
+                  scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+                >
+                  <meshStandardMaterial
+                    color={backdropColor}
+                    envMapIntensity={0.1}
+                  />
+                </Backdrop>
+              </Parallax>
+
+              {/* Ground */}
+              <Ground
+                mirror={1}
+                blur={[400, 100]}
+                mixBlur={12}
+                mixStrength={1.5}
+                rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+                position={[0, -0.4, 0]}
+              />
+            </group>
+          </Canvas>
+        </>
+      ) : (
+        <> </>
+      )}
     </>
   );
 };
