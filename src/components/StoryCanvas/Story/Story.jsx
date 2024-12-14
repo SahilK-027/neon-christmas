@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./Story.scss";
 import { useTrail, animated } from "@react-spring/web";
-import stories from "../../utils/storyData.js"
+import stories from "../../../utils/storyData.js"
 
 const Story = ({ start }) => {
   const birthStory = stories.birthStory;

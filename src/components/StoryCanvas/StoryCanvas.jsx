@@ -8,7 +8,7 @@ import { folder, Leva, useControls } from "leva";
 import { Perf } from "r3f-perf";
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
-import Story from "../Story/Story";
+import Story from "./Story/Story";
 import Ground from "../Ground/Ground";
 import Parallax from "../Parallax/Parallax";
 import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
