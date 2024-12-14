@@ -56,7 +56,7 @@ const NeonLightsScene = ({ isLoading }) => {
     }),
   });
 
-  const [currentModel, setCurrentModel] = useState("birthModel");
+  const [currentModel, setCurrentModel] = useState("sphereModel");
 
   return (
     <>
