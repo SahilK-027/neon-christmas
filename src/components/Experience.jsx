@@ -225,27 +225,29 @@ const Ground = (props) => {
   );
 };
 
-const Parallax = ({ children }) => {
+const Parallax = ({ isLoading, children }) => {
   const ref = useRef();
   const vec3 = new THREE.Vector3();
   const { camera, mouse } = useThree();
 
   useFrame(() => {
-    // Camera position should get smoothly set according to mouse position
-    camera.position.lerp(vec3.set(mouse.x * 0.05, 0, 3.0), 0.05);
+    if (!isLoading) {
+      // Camera position should get smoothly set according to mouse position
+      camera.position.lerp(vec3.set(mouse.x * 0.05, 0, 3.0), 0.05);
 
-    // Objects within parallax
-    ref.current.position.lerp(
-      vec3.set(-1 * mouse.x * 0.75, -1 * mouse.y * 0.05, 0),
-      0.05
-    );
+      // Objects within parallax
+      ref.current.position.lerp(
+        vec3.set(-1 * mouse.x * 0.75, -1 * mouse.y * 0.05, 0),
+        0.05
+      );
 
-    // Rotate objects within parallax
-    ref.current.rotation.y = THREE.MathUtils.lerp(
-      ref.current.rotation.y,
-      (-1 * mouse.x * Math.PI) / 20,
-      0
-    );
+      // Rotate objects within parallax
+      ref.current.rotation.y = THREE.MathUtils.lerp(
+        ref.current.rotation.y,
+        (-1 * mouse.x * Math.PI) / 20,
+        0
+      );
+    }
   });
 
   return <group ref={ref}>{children}</group>;
@@ -294,70 +296,64 @@ const Experience = ({ isLoading }) => {
 
   return (
     <>
-      {!isLoading ? (
-        <>
-          <Story />
-          <Leva collapsed />
-          <Canvas dpr={[1, 1.5]}>
-            {/* Setup */}
-            <Perf position="top-left" />
-            <color attach="background" args={["#121316"]} />
-            <OrbitControls />
+      <Story start={!isLoading} />
+      <Leva collapsed />
+      <Canvas dpr={[1, 1.5]}>
+        {/* Setup */}
+        <Perf position="top-left" />
+        <color attach="background" args={["#121316"]} />
+        <OrbitControls />
 
-            {/* Light */}
-            <ambientLight ambientLightIntensity={ambientLightIntensity} />
-            <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
-            <EffectComposer multisampling={2}>
-              <Bloom
-                kernelSize={KernelSize.SMALL}
-                luminanceThreshold={luminanceThreshold1}
-                intensity={intensity1}
+        {/* Light */}
+        <ambientLight ambientLightIntensity={ambientLightIntensity} />
+        <fog attach="fog" args={[fogColor, fogNear, fogFar]} />
+        <EffectComposer multisampling={2}>
+          <Bloom
+            kernelSize={KernelSize.SMALL}
+            luminanceThreshold={luminanceThreshold1}
+            intensity={intensity1}
+          />
+          <Bloom
+            kernelSize={KernelSize.HUGE}
+            luminanceThreshold={luminanceThreshold2}
+            intensity={intensity2}
+          />
+        </EffectComposer>
+
+        {/* Parallax effect */}
+        <group position={[0, -0.6, 0]}>
+          <Parallax isLoading={isLoading}>
+            {/* Model */}
+            <CurveModel />
+
+            {/* Backdrop */}
+            <Backdrop
+              floor={2}
+              position={[
+                backDropPositionX,
+                backDropPositionY,
+                backDropPositionZ,
+              ]}
+              scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+            >
+              <meshStandardMaterial
+                color={backdropColor}
+                envMapIntensity={0.1}
               />
-              <Bloom
-                kernelSize={KernelSize.HUGE}
-                luminanceThreshold={luminanceThreshold2}
-                intensity={intensity2}
-              />
-            </EffectComposer>
+            </Backdrop>
+          </Parallax>
 
-            {/* Parallax effect */}
-            <group position={[0, -0.6, 0]}>
-              <Parallax>
-                {/* Model */}
-                <CurveModel />
-
-                {/* Backdrop */}
-                <Backdrop
-                  floor={2}
-                  position={[
-                    backDropPositionX,
-                    backDropPositionY,
-                    backDropPositionZ,
-                  ]}
-                  scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
-                >
-                  <meshStandardMaterial
-                    color={backdropColor}
-                    envMapIntensity={0.1}
-                  />
-                </Backdrop>
-              </Parallax>
-
-              {/* Ground */}
-              <Ground
-                mirror={1}
-                blur={[400, 100]}
-                mixBlur={12}
-                mixStrength={1.5}
-                rotation={[-Math.PI / 2, 0, Math.PI / 2]}
-                position={[0, -0.4, 0]}
-              />
-            </group>
-          </Canvas>
-        </>
-      ) : (
-        <> </>
-      )}
+          {/* Ground */}
+          <Ground
+            mirror={1}
+            blur={[400, 100]}
+            mixBlur={12}
+            mixStrength={1.5}
+            rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+            position={[0, -0.4, 0]}
+          />
+        </group>
+      </Canvas>
     </>
   );
 };

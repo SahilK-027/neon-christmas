@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
 import Experience from "./components/Experience";
-import Loader from "./components/Loader/Loader";
 import * as THREE from "three";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
+import Loader from "./components/Loader/Loader";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -21,30 +19,24 @@ const App = () => {
       // Loaded
       () => {
         setLoadingProgress(100);
-        setIsLoading(false);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 10000);
       },
-      // In progress
-      (itemURL, itemsLoaded, totalItems) => {
-        console.log("itemURL", itemURL);
-        const percentProgress = (itemsLoaded / totalItems) * 100;
-        setLoadingProgress(percentProgress);
+
+      // Progress
+      (itemUrl, itemsLoaded, totalItems) => {
+        const progressRatio = (itemsLoaded / totalItems) * 100;
+        setLoadingProgress(progressRatio);
       }
     );
 
-    // Pre-Load all images
+    // Example Loaders
     const textureLoader = new THREE.TextureLoader(loadingManager);
-    textureLoader.load("/textures/color.jpg", () => {});
+    textureLoader.load("/textures/color.jpg", () => { });
 
-    // Pre-load all 3d models
-    const dracoLoader = new DRACOLoader(loadingManager);
-    dracoLoader.setDecoderPath("/static/draco/");
-    const gltfLoader = new GLTFLoader(loadingManager);
-    gltfLoader.setDRACOLoader(dracoLoader);
-    gltfLoader.load("/models/birth2.glb", () => {});
-
-    // Pre-load all audio
     const audioLoader = new THREE.AudioLoader(loadingManager);
-    audioLoader.load("/static/audio/bg.mp3", () => {});
+    audioLoader.load("/static/audio/bg.mp3", () => { });
   }, []);
 
   return (
@@ -60,7 +52,7 @@ const App = () => {
           alignItems: "center",
           justifyContent: "center",
           background: "#000",
-          zIndex: 1,
+          zIndex: 10,
           ...loaderSpring,
         }}
       >
