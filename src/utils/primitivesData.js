@@ -1,24 +1,4 @@
 const primitivesData = {
-  circleModel: {
-    path: "/models/circles.glb",
-    shaders: {
-      curve1: {
-        defaultColorA: "#308bff",
-        defaultColorB: "#4d35c4",
-        defaultIntensity: 2
-      },
-      curve2: {
-        defaultColorA: "orange",
-        defaultColorB: "red",
-        defaultIntensity: 2
-      },
-      curve3: {
-        defaultColorA: "green",
-        defaultColorB: "cyan",
-        defaultIntensity: 2
-      },
-    }
-  },
   monkeyModel: {
     path: "/models/monkey.glb",
     shaders: {
@@ -27,7 +7,8 @@ const primitivesData = {
         defaultColorB: "orange",
         defaultIntensity: 2
       },
-    }
+    },
+    fogColor: "#4b041f"
   },
   sphereModel: {
     path: "/models/sphere.glb",
@@ -37,7 +18,8 @@ const primitivesData = {
         defaultColorB: "teal",
         defaultIntensity: 2
       },
-    }
+    },
+    fogColor: "#154814"
   },
   birthModel: {
     path: "/models/birth.glb",
@@ -57,7 +39,8 @@ const primitivesData = {
         defaultColorB: "#f75eff",
         defaultIntensity: 1
       }
-    }
+    },
+    fogColor: "#3f1752"
   }
 };
 

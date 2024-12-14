@@ -16,6 +16,7 @@ import NeonModel from "../NeonModel/NeonModel";
 import primitivesData from "../../utils/primitivesData";
 
 const NeonLightsScene = ({ isLoading }) => {
+  const [currentModel, setCurrentModel] = useState("sphereModel");
   const {
     fogColor,
     fogNear,
@@ -34,7 +35,7 @@ const NeonLightsScene = ({ isLoading }) => {
     backdropColor,
   } = useControls({
     scene: folder({
-      fogColor: { value: "#3f1752" },
+      fogColor: { value: primitivesData[currentModel].fogColor },
       fogNear: { value: 7.1, min: 1, max: 10, step: 0.01 },
       fogFar: { value: 20.3, min: 1, max: 50, step: 0.01 },
       ambientLightIntensity: { value: 1, min: 0, max: 5, step: 0.01 },
@@ -56,11 +57,9 @@ const NeonLightsScene = ({ isLoading }) => {
     }),
   });
 
-  const [currentModel, setCurrentModel] = useState("sphereModel");
-
   return (
     <>
-      <Story start={!isLoading} />
+      {/* <Story start={!isLoading} /> */}
       <Leva collapsed />
       <Canvas dpr={[1, 1.5]}>
         {/* Setup */}
