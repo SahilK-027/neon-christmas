@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
-import Experience from "./components/3DExperience/Experience";
+import NeonLightsScene from "./components/NeonLightsScene/NeonLightsScene";
 import * as THREE from "three";
 import Loader from "./components/Loader/Loader";
 
@@ -36,7 +36,7 @@ const App = () => {
     textureLoader.load("/textures/color.jpg", () => { });
 
     const audioLoader = new THREE.AudioLoader(loadingManager);
-    audioLoader.load("/static/audio/bg.mp3", () => { });
+    audioLoader.load("/audio/bg.mp3", () => { });
   }, []);
 
   return (
@@ -58,7 +58,7 @@ const App = () => {
       >
         <Loader progress={loadingProgress} />
       </animated.div>
-      <Experience isLoading={isLoading} />
+      <NeonLightsScene isLoading={isLoading} />
     </>
   );
 };

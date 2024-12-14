@@ -16,8 +16,8 @@ const Story = ({ start }) => {
   const trail = useTrail(words.length, {
     opacity: isVisible ? 1 : 0,
     transform: isVisible ? "translateY(0px)" : "translateY(20px)",
-    config: { tension: 170, friction: 26 },
-    delay: 200,
+    config: { tension: 200, friction: 26 },
+    delay: 0,
   });
 
   useEffect(() => {

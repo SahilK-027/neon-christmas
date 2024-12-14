@@ -1,0 +1,176 @@
+import { useGLTF } from "@react-three/drei";
+import { useFrame, useThree } from "@react-three/fiber";
+import { useControls, folder } from "leva";
+import { useMemo, useRef, useEffect } from "react";
+import * as THREE from 'three';
+
+const NeonModel = () => {
+    const {
+        colorC1_a,
+        colorC1_b,
+        colorC2_a,
+        colorC2_b,
+        colorC3_a,
+        colorC3_b,
+        intensityC1,
+        intensityC2,
+        intensityC3,
+    } = useControls({
+        birthModel: folder({
+            colorC1_a: { value: "#308bff" },
+            colorC1_b: { value: "#4d35c4" },
+            colorC2_a: { value: "#ff0662" },
+            colorC2_b: { value: "#ffbd41" },
+            colorC3_a: { value: "pink" },
+            colorC3_b: { value: "#f75eff" },
+            intensityC1: { value: 2, min: 0, max: 5, step: 0.01 },
+            intensityC2: { value: 1.5, min: 0, max: 5, step: 0.01 },
+            intensityC3: { value: 1, min: 0, max: 5, step: 0.01 },
+        }),
+    });
+    // Shaders
+    const vertexShader = `
+      uniform vec3 uMouseWorld;
+      uniform float uTime;
+      
+      varying vec3 vPosition;
+      varying float vDistanceToMouse;
+  
+      void main() {
+          // Calculate distance to mouse
+          vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+          float distanceToMouse = distance(worldPosition, uMouseWorld);
+        
+          // fallOff calculation
+          float falloff = 1.0 - smoothstep(0.0, 0.6, distanceToMouse);
+          falloff = pow(falloff, 2.0); // Smooth quadratic falloff
+        
+          // Deform model based on mouse contact position
+          vec3 deformDirection = normalize(worldPosition - uMouseWorld);
+          vec3 newPosition = position + deformDirection * sin(distanceToMouse * 10.0 - uTime * 3.0) *  0.1 * falloff * 0.5;
+  
+          vPosition = newPosition;
+          vDistanceToMouse = distanceToMouse;
+        
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+      }
+    `;
+    const fragmentShader = `
+    uniform vec3 uColor1;
+      uniform vec3 uColor2;
+      uniform float uTime;
+      uniform float uIntensity;
+  
+      varying vec3 vPosition;
+      varying float vDistanceToMouse;
+  
+      void main() {
+          float wave = sin(vPosition.y * 3.0 + uTime * 2.5) * 0.5 + 0.5;
+          float pulse = pow(abs(sin(uTime * 1.5)), 2.0) * 0.3 + 0.7;
+        
+          // Change the color based on vDistanceToMouse
+          float distanceFactor = 1.0 - smoothstep(0.0, 0.5, vDistanceToMouse);
+        
+          vec3 color = mix(uColor1, uColor2, wave) * pulse * uIntensity * (1.0 + distanceFactor * 0.3);
+          gl_FragColor = vec4(color, 1.0);
+      }
+    `;
+
+    const createShaderMaterial = (color1, color2, intensity) => {
+        return new THREE.ShaderMaterial({
+            vertexShader,
+            fragmentShader,
+            uniforms: {
+                uTime: { value: 0 },
+                uColor1: { value: new THREE.Color(color1) },
+                uColor2: { value: new THREE.Color(color2) },
+                uIntensity: { value: intensity },
+                uMouseWorld: { value: new THREE.Vector3(0, 0, 0) },
+            },
+        });
+    };
+
+    const shaders = useMemo(() => {
+        return {
+            c1: createShaderMaterial(colorC1_a, colorC1_b, intensityC1),
+            c2: createShaderMaterial(colorC2_a, colorC2_b, intensityC2),
+            c3: createShaderMaterial(colorC3_a, colorC3_b, intensityC3),
+        };
+    }, [
+        colorC1_a,
+        colorC1_b,
+        intensityC1,
+        colorC2_a,
+        colorC2_b,
+        intensityC2,
+        colorC3_a,
+        colorC3_b,
+        intensityC3,
+    ]);
+
+    const { scene } = useGLTF("/models/birth.glb");
+    const { camera, gl } = useThree();
+    const mouse = useRef(new THREE.Vector3(0, 0, 0));
+    const smoothMouse = useRef(new THREE.Vector3(0, 0, 0));
+    const rayCaster = new THREE.Raycaster();
+    const pointer = new THREE.Vector2();
+
+    useEffect(() => {
+        const handleMouseMove = (event) => {
+            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
+            pointer.y = -1 * (event.clientY / window.innerHeight) * 2 + 1;
+
+            // Cast a ray to find world position
+            rayCaster.setFromCamera(pointer, camera);
+            const intersect = rayCaster.intersectObject(scene, true);
+
+            if (intersect.length > 0) {
+                mouse.current.copy(intersect[0].point);
+            }
+        };
+
+        gl.domElement.addEventListener("mousemove", handleMouseMove);
+        // unsubscribe
+        return () => {
+            gl.domElement.addEventListener("mousemove", handleMouseMove);
+        };
+    }, [scene, camera, gl]);
+
+    useFrame((_, delta) => {
+        // Smooth interpolation for mouse
+        smoothMouse.current.lerp(mouse.current, 0.1);
+
+        Object.values(shaders).forEach((shader) => {
+            shader.uniforms.uTime.value += delta;
+            shader.uniforms.uMouseWorld.value = smoothMouse.current;
+        });
+    });
+
+    useEffect(() => {
+        scene.traverse((child) => {
+            if (child.isMesh) {
+                let material = null;
+
+                switch (child.name) {
+                    case "c1":
+                        material = shaders.c1;
+                        break;
+                    case "c2":
+                        material = shaders.c2;
+                        break;
+                    case "c3":
+                        material = shaders.c3;
+                        break;
+                }
+
+                if (material) {
+                    child.material = material;
+                    child.material.needsUpdate = true;
+                }
+            }
+        });
+    }, [scene, shaders]);
+    return <primitive object={scene} scale={1} position={[0, 0, 0]} />;
+};
+
+export default NeonModel;
