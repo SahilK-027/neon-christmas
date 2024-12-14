@@ -23,8 +23,8 @@ const Ground = (props) => {
     });
 
     const [floor, normal] = useTexture([
-        "/textures/color4.jpg",
-        "/textures/normal4.jpg",
+        "/textures/color.jpg",
+        "/textures/normal.jpg",
     ]);
     return (
         <Reflector resolution={resolution} args={[scaleX, scaleY]} {...props}>
