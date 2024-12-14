@@ -4,78 +4,80 @@ import { useControls, folder } from "leva";
 import { useMemo, useRef, useEffect } from "react";
 import * as THREE from 'three';
 
-const NeonModel = () => {
-    const {
-        colorC1_a,
-        colorC1_b,
-        colorC2_a,
-        colorC2_b,
-        colorC3_a,
-        colorC3_b,
-        intensityC1,
-        intensityC2,
-        intensityC3,
-    } = useControls({
-        birthModel: folder({
-            colorC1_a: { value: "#308bff" },
-            colorC1_b: { value: "#4d35c4" },
-            colorC2_a: { value: "#ff0662" },
-            colorC2_b: { value: "#ffbd41" },
-            colorC3_a: { value: "pink" },
-            colorC3_b: { value: "#f75eff" },
-            intensityC1: { value: 2, min: 0, max: 5, step: 0.01 },
-            intensityC2: { value: 1.5, min: 0, max: 5, step: 0.01 },
-            intensityC3: { value: 1, min: 0, max: 5, step: 0.01 },
-        }),
+const NeonModel = ({ modelPath, curveConfigs }) => {
+    // Dynamic controls based on provided curve configurations
+    const dynamicControls = useMemo(() => {
+        const controls = {};
+        Object.entries(curveConfigs).forEach(([key, config]) => {
+            const prefix = `${key}_`;
+            controls[prefix + 'colorA'] = { value: config.defaultColorA || "#308bff" };
+            controls[prefix + 'colorB'] = { value: config.defaultColorB || "#4d35c4" };
+            controls[prefix + 'intensity'] = {
+                value: config.defaultIntensity || 2,
+                min: 0,
+                max: 5,
+                step: 0.01
+            };
+        });
+        return controls;
+    }, [curveConfigs]);
+
+    // Use dynamic controls
+    const controlValues = useControls({
+        curveSettings: folder(dynamicControls)
     });
-    // Shaders
+
+    // Vertex Shader
     const vertexShader = `
-      uniform vec3 uMouseWorld;
-      uniform float uTime;
-      
-      varying vec3 vPosition;
-      varying float vDistanceToMouse;
-  
-      void main() {
-          // Calculate distance to mouse
-          vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
-          float distanceToMouse = distance(worldPosition, uMouseWorld);
+        uniform vec3 uMouseWorld;
+        uniform float uTime;
         
-          // fallOff calculation
-          float falloff = 1.0 - smoothstep(0.0, 0.6, distanceToMouse);
-          falloff = pow(falloff, 2.0); // Smooth quadratic falloff
-        
-          // Deform model based on mouse contact position
-          vec3 deformDirection = normalize(worldPosition - uMouseWorld);
-          vec3 newPosition = position + deformDirection * sin(distanceToMouse * 10.0 - uTime * 3.0) *  0.1 * falloff * 0.5;
-  
-          vPosition = newPosition;
-          vDistanceToMouse = distanceToMouse;
-        
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
-      }
-    `;
-    const fragmentShader = `
-    uniform vec3 uColor1;
-      uniform vec3 uColor2;
-      uniform float uTime;
-      uniform float uIntensity;
-  
-      varying vec3 vPosition;
-      varying float vDistanceToMouse;
-  
-      void main() {
-          float wave = sin(vPosition.y * 3.0 + uTime * 2.5) * 0.5 + 0.5;
-          float pulse = pow(abs(sin(uTime * 1.5)), 2.0) * 0.3 + 0.7;
-        
-          // Change the color based on vDistanceToMouse
-          float distanceFactor = 1.0 - smoothstep(0.0, 0.5, vDistanceToMouse);
-        
-          vec3 color = mix(uColor1, uColor2, wave) * pulse * uIntensity * (1.0 + distanceFactor * 0.3);
-          gl_FragColor = vec4(color, 1.0);
-      }
+        varying vec3 vPosition;
+        varying float vDistanceToMouse;
+    
+        void main() {
+            // Calculate distance to mouse
+            vec3 worldPosition = (modelMatrix * vec4(position, 1.0)).xyz;
+            float distanceToMouse = distance(worldPosition, uMouseWorld);
+          
+            // fallOff calculation
+            float falloff = 1.0 - smoothstep(0.0, 0.6, distanceToMouse);
+            falloff = pow(falloff, 2.0); // Smooth quadratic falloff
+          
+            // Deform model based on mouse contact position
+            vec3 deformDirection = normalize(worldPosition - uMouseWorld);
+            vec3 newPosition = position + deformDirection * sin(distanceToMouse * 10.0 - uTime * 3.0) *  0.1 * falloff * 0.5;
+    
+            vPosition = newPosition;
+            vDistanceToMouse = distanceToMouse;
+          
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+        }
     `;
 
+    // Fragment Shader
+    const fragmentShader = `
+        uniform vec3 uColor1;
+        uniform vec3 uColor2;
+        uniform float uTime;
+        uniform float uIntensity;
+    
+        varying vec3 vPosition;
+        varying float vDistanceToMouse;
+    
+        void main() {
+            float wave = sin(vPosition.y * 3.0 + uTime * 2.5) * 0.5 + 0.5;
+            float pulse = pow(abs(sin(uTime * 1.5)), 2.0) * 0.3 + 0.7;
+          
+            // Change the color based on vDistanceToMouse
+            float distanceFactor = 1.0 - smoothstep(0.0, 0.5, vDistanceToMouse);
+          
+            vec3 color = mix(uColor1, uColor2, wave) * pulse * uIntensity * (1.0 + distanceFactor * 0.3);
+            gl_FragColor = vec4(color, 1.0);
+        }
+    `;
+
+    // Create shader material dynamically
     const createShaderMaterial = (color1, color2, intensity) => {
         return new THREE.ShaderMaterial({
             vertexShader,
@@ -90,31 +92,28 @@ const NeonModel = () => {
         });
     };
 
+    // Create shaders dynamically based on control values
     const shaders = useMemo(() => {
-        return {
-            c1: createShaderMaterial(colorC1_a, colorC1_b, intensityC1),
-            c2: createShaderMaterial(colorC2_a, colorC2_b, intensityC2),
-            c3: createShaderMaterial(colorC3_a, colorC3_b, intensityC3),
-        };
-    }, [
-        colorC1_a,
-        colorC1_b,
-        intensityC1,
-        colorC2_a,
-        colorC2_b,
-        intensityC2,
-        colorC3_a,
-        colorC3_b,
-        intensityC3,
-    ]);
+        const generatedShaders = {};
+        Object.entries(curveConfigs).forEach(([key, config]) => {
+            const prefix = `${key}_`;
+            generatedShaders[key] = createShaderMaterial(
+                controlValues[prefix + 'colorA'],
+                controlValues[prefix + 'colorB'],
+                controlValues[prefix + 'intensity']
+            );
+        });
+        return generatedShaders;
+    }, [controlValues, curveConfigs]);
 
-    const { scene } = useGLTF("/models/birth.glb");
+    const { scene } = useGLTF(modelPath);
     const { camera, gl } = useThree();
     const mouse = useRef(new THREE.Vector3(0, 0, 0));
     const smoothMouse = useRef(new THREE.Vector3(0, 0, 0));
     const rayCaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2();
 
+    // Mouse move event handler
     useEffect(() => {
         const handleMouseMove = (event) => {
             pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -130,12 +129,12 @@ const NeonModel = () => {
         };
 
         gl.domElement.addEventListener("mousemove", handleMouseMove);
-        // unsubscribe
         return () => {
-            gl.domElement.addEventListener("mousemove", handleMouseMove);
+            gl.domElement.removeEventListener("mousemove", handleMouseMove);
         };
     }, [scene, camera, gl]);
 
+    // Animate and update shaders
     useFrame((_, delta) => {
         // Smooth interpolation for mouse
         smoothMouse.current.lerp(mouse.current, 0.1);
@@ -146,30 +145,26 @@ const NeonModel = () => {
         });
     });
 
+    // Apply materials to meshes
     useEffect(() => {
         scene.traverse((child) => {
             if (child.isMesh) {
-                let material = null;
+                // Find the corresponding shader based on the mesh name
+                const matchingShader = Object.entries(shaders).find(
+                    ([key, shader]) => {
 
-                switch (child.name) {
-                    case "c1":
-                        material = shaders.c1;
-                        break;
-                    case "c2":
-                        material = shaders.c2;
-                        break;
-                    case "c3":
-                        material = shaders.c3;
-                        break;
-                }
+                        return child.name.toLowerCase().includes(key.toLowerCase())
+                    }
+                );
 
-                if (material) {
-                    child.material = material;
+                if (matchingShader) {
+                    child.material = matchingShader[1];
                     child.material.needsUpdate = true;
                 }
             }
         });
     }, [scene, shaders]);
+
     return <primitive object={scene} scale={1} position={[0, 0, 0]} />;
 };
 

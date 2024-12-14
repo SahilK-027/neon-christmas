@@ -6,13 +6,14 @@ import {
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { folder, Leva, useControls } from "leva";
 import { Perf } from "r3f-perf";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import Story from "../Story/Story";
 import Ground from "../Ground/Ground";
 import Parallax from "../Parallax/Parallax";
 import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import NeonModel from "../NeonModel/NeonModel";
+import primitivesData from "../../utils/primitivesData";
 
 const NeonLightsScene = ({ isLoading }) => {
   const {
@@ -55,10 +56,12 @@ const NeonLightsScene = ({ isLoading }) => {
     }),
   });
 
+  const [currentModel, setCurrentModel] = useState("birthModel");
+
   return (
     <>
       <Story start={!isLoading} />
-      <Leva collapsed hidden />
+      <Leva collapsed />
       <Canvas dpr={[1, 1.5]}>
         {/* Setup */}
         {/* <Perf position="top-left" /> */}
@@ -81,7 +84,10 @@ const NeonLightsScene = ({ isLoading }) => {
         <group position={[0, -0.6, 0]}>
           <Parallax isLoading={isLoading}>
             {/* Model */}
-            <NeonModel />
+            <NeonModel
+              modelPath={primitivesData[currentModel].path}
+              curveConfigs={primitivesData[currentModel].shaders}
+            />
 
             {/* Backdrop */}
             <Backdrop
