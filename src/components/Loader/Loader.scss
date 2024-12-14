@@ -1,37 +1,34 @@
 .loader {
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    position: absolute;
-    top: 0;
-    left: 0;
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 3;
-    pointer-events: none;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    background-color: #121316;
 
     .progress-container {
         position: relative;
-        width: 150px;
-        height: 150px;
+        width: 160px;
+        height: 160px;
 
         .progress-circle {
             width: 100%;
             height: 100%;
-            background: conic-gradient(#7444ff var(--progress, 0%), #000 0%);
+            background: conic-gradient(#8a2be2, #9932cc, #ba55d3, #da70d6, #ee82ee, #8a2be2 var(--progress, 0%), #1c1d22 0%);
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
 
             .logo {
-                width: 90px;
-                height: 90px;
-                padding: 20px;
-                background-color: #000;
+                width: 95px;
+                height: 95px;
+                padding: 18px;
+                background: #21252e;
+                filter: grayscale(1);
+                opacity: 1;
                 border-radius: 50%;
-                z-index: 1;
                 box-sizing: content-box;
             }
         }
@@ -42,19 +39,20 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 140px;
-            height: 140px;
-            background-color: #000;
+            width: 154px;
+            height: 154px;
+            background-color: #121316;
             border-radius: 50%;
         }
     }
 
     .text {
         position: absolute;
-        color: gray;
-        font-family: 12px;
+        color: #4f4f4f;
+        font-size: 15px;
         top: 90%;
         width: 300px;
         text-align: center;
+        top: 85%;
     }
 }

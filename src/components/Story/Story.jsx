@@ -6,7 +6,7 @@ import stories from "../../utils/storyData.js"
 const Story = ({ start }) => {
   const birthStory = stories.birthStory;
 
-  const lineDuration = [2000, 5000, 4000, 6000, 4250, 4750, 6500];
+  const lineDuration = [500, 5000, 4000, 6000, 4250, 4750, 6500];
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
 
@@ -22,8 +22,6 @@ const Story = ({ start }) => {
 
   useEffect(() => {
     if (start) {
-
-
       if (currentLineIndex >= birthStory.length) {
         setCurrentLineIndex(0);
         return;

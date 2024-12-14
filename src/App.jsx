@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
-import Experience from "./components/Experience";
+import Experience from "./components/3DExperience/Experience";
 import * as THREE from "three";
 import Loader from "./components/Loader/Loader";
 
@@ -21,7 +21,7 @@ const App = () => {
         setLoadingProgress(100);
         setTimeout(() => {
           setIsLoading(false);
-        }, 10000);
+        }, 1000)
       },
 
       // Progress
