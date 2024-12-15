@@ -15,6 +15,7 @@ import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import NeonModel from "../NeonModel/NeonModel";
 import primitivesData from "../../utils/primitivesData";
 import StoryProgressBar from "./StoryProgressBar/StoryProgressBar";
+import "./StoryCanvas.scss"
 
 const StoryCanvas = ({ startStory, startParallax }) => {
   const [currentModel, setCurrentModel] = useState("birthModel");
@@ -60,65 +61,67 @@ const StoryCanvas = ({ startStory, startParallax }) => {
 
   return (
     <>
-      <Story start={startStory} />
-      <Leva collapsed />
-      <Canvas dpr={[1, 1.5]}>
-        {/* Setup */}
-        {/* <Perf position="top-left" /> */}
-        <color attach="background" args={["#121316"]} />
-        <OrbitControls />
+      <div id="story-board">
+        <Story start={startStory} />
+        <Leva collapsed />
+        <Canvas dpr={[1, 1.5]}>
+          {/* Setup */}
+          {/* <Perf position="top-left" /> */}
+          <color attach="background" args={["#121316"]} />
+          <OrbitControls />
 
-        {/* Light & Post Processing */}
-        <LightingAndEffects
-          ambientLightIntensity={ambientLightIntensity}
-          fogColor={fogColor}
-          fogNear={fogNear}
-          fogFar={fogFar}
-          luminanceThreshold1={luminanceThreshold1}
-          intensity1={intensity1}
-          luminanceThreshold2={luminanceThreshold2}
-          intensity2={intensity2}
-        />
-
-        {/* Parallax effect */}
-        <group position={[0, -0.6, 0]}>
-          <Parallax startParallax={startParallax}>
-            {/* Model */}
-            <NeonModel
-              modelPath={primitivesData[currentModel].path}
-              curveConfigs={primitivesData[currentModel].shaders}
-            />
-
-            {/* Backdrop */}
-            <Backdrop
-              floor={2}
-              position={[
-                backDropPositionX,
-                backDropPositionY,
-                backDropPositionZ,
-              ]}
-              scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
-            >
-              <meshStandardMaterial
-                color={backdropColor}
-                envMapIntensity={0.1}
-              />
-            </Backdrop>
-          </Parallax>
-
-          {/* Ground */}
-          <Ground
-            mirror={1}
-            blur={[400, 100]}
-            mixBlur={12}
-            mixStrength={1.5}
-            rotation={[-Math.PI / 2, 0, Math.PI / 2]}
-            position={[0, -0.4, 0]}
+          {/* Light & Post Processing */}
+          <LightingAndEffects
+            ambientLightIntensity={ambientLightIntensity}
+            fogColor={fogColor}
+            fogNear={fogNear}
+            fogFar={fogFar}
+            luminanceThreshold1={luminanceThreshold1}
+            intensity1={intensity1}
+            luminanceThreshold2={luminanceThreshold2}
+            intensity2={intensity2}
           />
-        </group>
-      </Canvas>
 
-      <StoryProgressBar />
+          {/* Parallax effect */}
+          <group position={[0, -0.6, 0]}>
+            <Parallax startParallax={startParallax}>
+              {/* Model */}
+              <NeonModel
+                modelPath={primitivesData[currentModel].path}
+                curveConfigs={primitivesData[currentModel].shaders}
+              />
+
+              {/* Backdrop */}
+              <Backdrop
+                floor={2}
+                position={[
+                  backDropPositionX,
+                  backDropPositionY,
+                  backDropPositionZ,
+                ]}
+                scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+              >
+                <meshStandardMaterial
+                  color={backdropColor}
+                  envMapIntensity={0.1}
+                />
+              </Backdrop>
+            </Parallax>
+
+            {/* Ground */}
+            <Ground
+              mirror={1}
+              blur={[400, 100]}
+              mixBlur={12}
+              mixStrength={1.5}
+              rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+              position={[0, -0.4, 0]}
+            />
+          </group>
+        </Canvas>
+
+        <StoryProgressBar />
+      </div>
     </>
   );
 };

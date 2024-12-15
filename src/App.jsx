@@ -5,6 +5,7 @@ import Loader from "./components/Loader/Loader";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import StoryCanvas from "./components/StoryCanvas/StoryCanvas";
+import LandingPage from "./components/LandingPage/LandingPage";
 
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -23,7 +24,7 @@ const App = () => {
         setLoadingProgress(100);
         setTimeout(() => {
           setIsLoading(false);
-        }, 800)
+        }, 800);
       },
 
       // Progress
@@ -35,8 +36,8 @@ const App = () => {
 
     // Preload all images
     const textureLoader = new THREE.TextureLoader(loadingManager);
-    textureLoader.load("/textures/color.jpg", () => { });
-    textureLoader.load("/textures/normal.jpg", () => { });
+    textureLoader.load("/textures/color.jpg", () => {});
+    textureLoader.load("/textures/normal.jpg", () => {});
 
     // Preload all models
     const dracoLoader = new DRACOLoader(loadingManager);
@@ -44,15 +45,15 @@ const App = () => {
     const gltfLoader = new GLTFLoader(loadingManager);
     gltfLoader.setDRACOLoader(dracoLoader);
 
-    gltfLoader.load("/models/birth.glb", () => { })
+    gltfLoader.load("/models/birth.glb", () => {});
 
     // Preload all audio
     const audioLoader = new THREE.AudioLoader(loadingManager);
-    audioLoader.load("/audio/bg.mp3", () => { });
-    audioLoader.load("/audio/ascension.mp3", () => { });
-    audioLoader.load("/audio/baptism.mp3", () => { });
-    audioLoader.load("/audio/birth.mp3", () => { });
-    audioLoader.load("/audio/crucifixion.mp3", () => { });
+    audioLoader.load("/audio/bg.mp3", () => {});
+    audioLoader.load("/audio/ascension.mp3", () => {});
+    audioLoader.load("/audio/baptism.mp3", () => {});
+    audioLoader.load("/audio/birth.mp3", () => {});
+    audioLoader.load("/audio/crucifixion.mp3", () => {});
   }, []);
 
   return (
@@ -75,6 +76,7 @@ const App = () => {
         <Loader progress={loadingProgress} />
       </animated.div>
       <StoryCanvas startStory={!isLoading} startParallax={!isLoading} />
+      <LandingPage />
     </>
   );
 };
