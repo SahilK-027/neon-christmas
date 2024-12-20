@@ -16,12 +16,73 @@
         width: 100%;
         display: flex;
         justify-content: space-between;
-        align-items: center;
 
         .dev {
-            width: 300px;
-            line-height: 1.5rem;
-            font-size: 18px;
+            width: 350px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+
+            .developer {
+                line-height: 1.5rem;
+                font-size: 20px;
+            }
+
+            .headphone-info {
+                line-height: 1.5rem;
+                font-size: 18px;
+            }
+        }
+
+
+        .music-bars {
+            height: 20px;
+            width: 42px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .stroke {
+            display: block;
+            background: #fff;
+            height: 100%;
+            width: 3px;
+            border-radius: 50px;
+            margin: 0 3px;
+            animation: animate 1.2s linear infinite;
+            animation-play-state: paused;
+        }
+
+        @keyframes animate {
+            50% {
+                height: 20%;
+            }
+
+            100% {
+                height: 100%;
+            }
+        }
+
+        .stroke:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .stroke:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .stroke:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        .stroke:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .stroke:nth-child(5) {
+            animation-delay: 0s;
         }
     }
 
@@ -34,36 +95,120 @@
         width: 100%;
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: last baseline;
 
         h1 {
-            font-size: 50px;
-            margin-bottom: 20px;
+            font-size: 80px;
+            color: #000;
         }
 
-        h2 {
-            font-size: 28px;
-            font-weight: 300;
+        .neon {
+            text-shadow:
+                0 0 4px #fff,
+                0 0 4px #fff,
+                0 0 4px #fff,
+                0 0 4px #f00,
+                /* Start with red */
+                0 0 4px #f00,
+                0 0 4px #f00,
+                0 0 4px #f00;
+            animation: neonColorShift 10s infinite alternate;
         }
 
-        .enter-button button {
-            background: transparent;
-            color: #fff;
-            font-size: 18px;
-            padding: 28px 18px;
-            border: none;
-            border-radius: 100px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: #ffffff38;
-            border: 1px solid #ffffff;
-            font-weight: 400;
+        @keyframes neonColorShift {
+            0% {
+                text-shadow:
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #f00,
+                    /* Red */
+                    0 0 4px #f00,
+                    0 0 4px #f00,
+                    0 0 4px #f00;
+            }
+
+            25% {
+                text-shadow:
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #f90,
+                    /* Orange */
+                    0 0 4px #f90,
+                    0 0 4px #f90,
+                    0 0 4px #f90;
+            }
+
+            50% {
+                text-shadow:
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #ff0,
+                    /* Yellow */
+                    0 0 4px #ff0,
+                    0 0 4px #ff0,
+                    0 0 4px #ff0;
+            }
+
+            75% {
+                text-shadow:
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #00f,
+                    /* Blue */
+                    0 0 4px #00f,
+                    0 0 4px #00f,
+                    0 0 4px #00f;
+            }
+
+            100% {
+                text-shadow:
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #fff,
+                    0 0 4px #90f,
+                    /* Violet */
+                    0 0 4px #90f,
+                    0 0 4px #90f,
+                    0 0 4px #90f;
+            }
         }
 
-        .enter-button button:hover {
-            background: #ffffff;
-            color: #121316;
-            box-shadow: 0 0 10px #fff;
+        .enter-button {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            align-items: flex-end;
+
+            button {
+                background: transparent;
+                color: #fff;
+                font-size: 18px;
+                padding: 28px 18px;
+                border: none;
+                border-radius: 100px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background: #ffffff38;
+                border: 1px solid #ffffff;
+                font-weight: 400;
+                width: 80px;
+                height: 80px;
+
+                &:hover {
+                    background: #ffffff;
+                    color: #121316;
+                    box-shadow: 0 0 10px #fff;
+                }
+            }
+
+            h2 {
+                font-size: 30px;
+                font-weight: 300;
+            }
         }
     }
 }

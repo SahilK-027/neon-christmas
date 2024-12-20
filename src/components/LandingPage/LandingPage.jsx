@@ -10,7 +10,7 @@ import { folder, useControls } from "leva";
 import primitivesData from "../../utils/primitivesData";
 
 const LandingPage = () => {
-  const [currentModel, setCurrentModel] = useState("sphereModel");
+  const [currentModel, setCurrentModel] = useState("xMasModel");
   const {
     fogColor,
     fogNear,
@@ -54,17 +54,28 @@ const LandingPage = () => {
     <div id="landing-page">
       <div className="nav-row">
         <div className="dev">
-          Creative story experiment built with three.js & R3F by SahilK-027
+          <p className="developer">
+            Creative story experiment built with three.js & R3F by SahilK-027
+          </p>
+          <p className="headphone-info">
+            Use <i className="fa-solid fa-headphones"></i> for immersive
+            experience
+          </p>
         </div>
-        <div className="music">M</div>
+        <div class="music-bars">
+          <span class="stroke"></span>
+          <span class="stroke"></span>
+          <span class="stroke"></span>
+        </div>
       </div>
       <div className="footer-row">
         <div className="experience-name">
-          <h1>Neon Christmas</h1>
-          <h2>Explore the life of Jesus</h2>
+          <h1 className="neon">The</h1>
+          <h1 className="neon">Neon Christmas</h1>
         </div>
         <div className="enter-button">
           <button>Enter</button>
+          <h2>Explore the life of Jesus</h2>
         </div>
       </div>
 
@@ -87,7 +98,7 @@ const LandingPage = () => {
         />
 
         {/* Parallax effect */}
-        <group position={[0, -0.6, 0]}>
+        <group position={[0, -0.7, 0]}>
           <Parallax startParallax={true}>
             {/* Model */}
             <NeonModel
