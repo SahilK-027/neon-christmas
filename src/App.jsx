@@ -10,6 +10,7 @@ import LandingPage from "./components/LandingPage/LandingPage";
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const loaderSpring = useSpring({
     transform: isLoading ? "translateY(0%)" : "translateY(-100%)",
@@ -56,6 +57,47 @@ const App = () => {
     audioLoader.load("/audio/crucifixion.mp3", () => {});
   }, []);
 
+  useEffect(() => {
+    const handleKeydown = (event) => {
+      if (event.key === "f") {
+        if (!isFullscreen) {
+          const elem = document.documentElement; // Entire page
+          if (elem.requestFullscreen) {
+            elem.requestFullscreen();
+          } else if (elem.webkitRequestFullscreen) {
+            elem.webkitRequestFullscreen(); // For Safari
+          } else if (elem.msRequestFullscreen) {
+            elem.msRequestFullscreen(); // For IE11
+          }
+          setIsFullscreen(true);
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen();
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen(); // For Safari
+          } else if (document.msExitFullscreen) {
+            document.msExitFullscreen(); // For IE11
+          }
+          setIsFullscreen(false);
+        }
+      } else if (event.key === "Escape") {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen(); // For Safari
+        } else if (document.msExitFullscreen) {
+          document.msExitFullscreen(); // For IE11
+        }
+        setIsFullscreen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeydown);
+    return () => {
+      window.removeEventListener("keydown", handleKeydown);
+    };
+  }, [isFullscreen]);
+
   return (
     <>
       <animated.div
@@ -75,7 +117,7 @@ const App = () => {
       >
         <Loader progress={loadingProgress} />
       </animated.div>
-      <StoryCanvas startStory={!isLoading} startParallax={!isLoading} />
+      {/* <StoryCanvas startStory={!isLoading} startParallax={!isLoading} /> */}
       <LandingPage />
     </>
   );
