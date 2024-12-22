@@ -55,6 +55,10 @@
             animation-play-state: paused;
         }
 
+        .stroke.active {
+            animation-play-state: running;
+        }
+
         @keyframes animate {
             50% {
                 height: 20%;

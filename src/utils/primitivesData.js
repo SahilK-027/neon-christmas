@@ -45,7 +45,7 @@ const primitivesData = {
         defaultIntensity: 1.3,
       },
     },
-    fogColor: "#0b3e1c",
+    fogColor: "#121316",
   },
   birthModel: {
     path: "/models/birth.glb",

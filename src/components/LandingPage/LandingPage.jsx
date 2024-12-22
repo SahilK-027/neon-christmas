@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "./LandingPage.scss";
 import { Canvas } from "@react-three/fiber";
 import { Backdrop, OrbitControls } from "@react-three/drei";
@@ -8,9 +8,12 @@ import NeonModel from "../NeonModel/NeonModel";
 import Ground from "../Ground/Ground";
 import { folder, useControls } from "leva";
 import primitivesData from "../../utils/primitivesData";
+import * as THREE from "three";
 
-const LandingPage = () => {
+const LandingPage = ({ isMusicOn, setIsMusicOn }) => {
   const [currentModel, setCurrentModel] = useState("xMasModel");
+  const audioRef = useRef(null);
+
   const {
     fogColor,
     fogNear,
@@ -50,6 +53,36 @@ const LandingPage = () => {
       backdropColor: { value: "#121316" },
     }),
   });
+
+  useEffect(() => {
+    // Initialize audio when the component mounts
+    const listener = new THREE.AudioListener();
+    const audio = new THREE.Audio(listener);
+    const audioLoader = new THREE.AudioLoader();
+
+    audioLoader.load("/audio/landing.mp3", (buffer) => {
+      audio.setBuffer(buffer);
+      audio.setLoop(true);
+      audio.setVolume(0.2);
+      audioRef.current = audio;
+    });
+
+    return () => {
+      if (audioRef.current) audioRef.current.stop();
+    };
+  }, []);
+
+  const toggleMusic = () => {
+    if (audioRef.current) {
+      if (isMusicOn) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsMusicOn((prev) => !prev); // Use functional state update
+    }
+  };
+
   return (
     <div id="landing-page">
       <div className="nav-row">
@@ -62,10 +95,10 @@ const LandingPage = () => {
             experience
           </p>
         </div>
-        <div class="music-bars">
-          <span class="stroke"></span>
-          <span class="stroke"></span>
-          <span class="stroke"></span>
+        <div className="music-bars" onClick={toggleMusic}>
+          <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
+          <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
+          <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
         </div>
       </div>
       <div className="footer-row">
@@ -80,12 +113,8 @@ const LandingPage = () => {
       </div>
 
       <Canvas dpr={[1, 1.5]}>
-        {/* Setup */}
-        {/* <Perf position="top-left" /> */}
         <color attach="background" args={["#121316"]} />
         <OrbitControls />
-
-        {/* Light & Post Processing */}
         <LightingAndEffects
           ambientLightIntensity={ambientLightIntensity}
           fogColor={fogColor}
@@ -96,17 +125,12 @@ const LandingPage = () => {
           luminanceThreshold2={luminanceThreshold2}
           intensity2={intensity2}
         />
-
-        {/* Parallax effect */}
         <group position={[0, -0.7, 0]}>
           <Parallax startParallax={true}>
-            {/* Model */}
             <NeonModel
               modelPath={primitivesData[currentModel].path}
               curveConfigs={primitivesData[currentModel].shaders}
             />
-
-            {/* Backdrop */}
             <Backdrop
               floor={2}
               position={[
@@ -122,8 +146,6 @@ const LandingPage = () => {
               />
             </Backdrop>
           </Parallax>
-
-          {/* Ground */}
           <Ground
             mirror={1}
             blur={[400, 100]}

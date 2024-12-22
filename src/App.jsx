@@ -11,6 +11,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMusicOn, setIsMusicOn] = useState(false);
 
   const loaderSpring = useSpring({
     transform: isLoading ? "translateY(0%)" : "translateY(-100%)",
@@ -117,8 +118,8 @@ const App = () => {
       >
         <Loader progress={loadingProgress} />
       </animated.div>
-      {/* <StoryCanvas startStory={!isLoading} startParallax={!isLoading} /> */}
-      <LandingPage />
+      <LandingPage isMusicOn={isMusicOn} setIsMusicOn={setIsMusicOn} />
+      <StoryCanvas startStory={!isLoading} startParallax={!isLoading} />
     </>
   );
 };
