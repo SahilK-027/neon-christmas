@@ -11,3 +11,17 @@
     pointer-events: none;
     line-height: 2.5rem;
 }
+
+.story-name-overlay {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background: #121316;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+}

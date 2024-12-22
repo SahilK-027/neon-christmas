@@ -1,26 +1,4 @@
 const primitivesData = {
-  monkeyModel: {
-    path: "/models/monkey.glb",
-    shaders: {
-      curve1: {
-        defaultColorA: "red",
-        defaultColorB: "orange",
-        defaultIntensity: 2,
-      },
-    },
-    fogColor: "#4b041f",
-  },
-  sphereModel: {
-    path: "/models/sphere.glb",
-    shaders: {
-      curve1: {
-        defaultColorA: "#a1ce9e",
-        defaultColorB: "teal",
-        defaultIntensity: 2,
-      },
-    },
-    fogColor: "#154814",
-  },
   xMasModel: {
     path: "/models/xMas.glb",
     shaders: {
@@ -67,6 +45,17 @@ const primitivesData = {
       },
     },
     fogColor: "#3f1752",
+  },
+  baptismModel: {
+    path: "/models/monkey.glb",
+    shaders: {
+      curve1: {
+        defaultColorA: "red",
+        defaultColorB: "orange",
+        defaultIntensity: 2,
+      },
+    },
+    fogColor: "#4b041f",
   },
 };
 

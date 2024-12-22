@@ -8,7 +8,6 @@ import NeonModel from "../NeonModel/NeonModel";
 import Ground from "../Ground/Ground";
 import { folder, useControls } from "leva";
 import primitivesData from "../../utils/primitivesData";
-import * as THREE from "three";
 import { useSpring, animated } from "@react-spring/web";
 
 const LandingPage = ({ enterStory, setEnterStory }) => {

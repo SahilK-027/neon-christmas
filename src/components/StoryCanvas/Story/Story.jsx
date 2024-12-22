@@ -1,18 +1,23 @@
 import React, { useEffect, useState } from "react";
 import "./Story.scss";
-import { useTrail, animated } from "@react-spring/web";
-import stories from "../../../utils/storyData.js"
+import { useTrail, animated, useSpring } from "@react-spring/web";
+import stories from "../../../utils/storyData.js";
 
 const Story = ({ start }) => {
-  const birthStory = stories.birthStory;
-
-  const lineDuration = [500, 5000, 4000, 6000, 4250, 4750, 6500];
+  const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [showStoryName, setShowStoryName] = useState(true);
+  const [shouldDisplayStoryName, setShouldDisplayStoryName] = useState(true);
 
-  const words = birthStory[currentLineIndex]?.split(" ") || [];
+  // Extract current story and line duration
+  const currentStory = stories[currentStoryIndex]?.storyArray || [];
+  const lineDuration = stories[currentStoryIndex]?.lineDuration || [];
+  const storyName = stories[currentStoryIndex]?.storyName || "Untitled";
 
-  // Animate each word
+  const words = currentStory[currentLineIndex]?.split(" ") || [];
+
+  // Trail animation for words
   const trail = useTrail(words.length, {
     opacity: isVisible ? 1 : 0,
     transform: isVisible ? "translateY(0px)" : "translateY(20px)",
@@ -20,13 +25,42 @@ const Story = ({ start }) => {
     delay: 0,
   });
 
+  // Smooth animation for story name
+  const storyNameAnimation = useSpring({
+    opacity: showStoryName ? 1 : 0,
+    config: { tension: 20, friction: 10, duration: 2000 },
+    onRest: () => {
+      if (!showStoryName) {
+        setShouldDisplayStoryName(false);
+      }
+    },
+  });
+
   useEffect(() => {
     if (start) {
-      if (currentLineIndex >= birthStory.length) {
-        setCurrentLineIndex(0);
+      if (showStoryName) {
+        setShouldDisplayStoryName(true);
+        // Hide story name after 3 seconds
+        const storyNameTimer = setTimeout(() => {
+          setShowStoryName(false);
+        }, 4000);
+
+        return () => clearTimeout(storyNameTimer);
+      }
+
+      if (currentLineIndex >= currentStory.length) {
+        // Move to the next story if available
+        if (currentStoryIndex + 1 < stories.length) {
+          setShowStoryName(true);
+          setShouldDisplayStoryName(true);
+          setCurrentStoryIndex((prev) => prev + 1);
+          setCurrentLineIndex(0);
+        }
+        // TODO: Else replay story
         return;
       }
 
+      // Show and hide the current line
       const showTimer = setTimeout(() => {
         setIsVisible(true);
       }, 500);
@@ -35,25 +69,48 @@ const Story = ({ start }) => {
         setIsVisible(false);
       }, lineDuration[currentLineIndex]);
 
-      const nextlineTimer = setTimeout(() => {
+      // Move to the next line
+      const nextLineTimer = setTimeout(() => {
         setCurrentLineIndex((prev) => prev + 1);
       }, lineDuration[currentLineIndex] + 2000);
 
-      // Unsubscribe
       return () => {
         clearTimeout(showTimer);
         clearTimeout(hideTimer);
-        clearTimeout(nextlineTimer);
+        clearTimeout(nextLineTimer);
       };
     }
-  }, [currentLineIndex, birthStory.length, start]);
+  }, [
+    start,
+    currentLineIndex,
+    currentStory,
+    lineDuration,
+    currentStoryIndex,
+    showStoryName,
+  ]);
 
   return (
     <>
-      {
-        start
-          ?
-          (
+      {start ? (
+        <div className="story-container">
+          {shouldDisplayStoryName ? (
+            <animated.div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                ...storyNameAnimation,
+              }}
+              className="story-name-overlay"
+            >
+              <h1>{storyName}</h1>
+            </animated.div>
+          ) : (
             <div className="story-overlay-text">
               <div className="line-wrapper">
                 {trail.map((style, idx) => (
@@ -63,12 +120,10 @@ const Story = ({ start }) => {
                 ))}
               </div>
             </div>
-          )
-          :
-          <></>
-      }
+          )}
+        </div>
+      ) : null}
     </>
-
   );
 };
 
