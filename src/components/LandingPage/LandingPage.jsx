@@ -9,10 +9,24 @@ import Ground from "../Ground/Ground";
 import { folder, useControls } from "leva";
 import primitivesData from "../../utils/primitivesData";
 import * as THREE from "three";
+import { useSpring, animated } from "@react-spring/web";
 
-const LandingPage = ({ isMusicOn, setIsMusicOn }) => {
+const LandingPage = ({
+  enterStory,
+  setEnterStory,
+  isMusicOn,
+  setIsMusicOn,
+}) => {
   const [currentModel, setCurrentModel] = useState("xMasModel");
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
   const audioRef = useRef(null);
+  const listenerRef = useRef(null);
+
+  const landingSpring = useSpring({
+    // transform: enterStory ? "translateY(-100%)" : "translateY(0%)",
+    opacity: enterStory ? 0 : 1,
+    config: { tension: 100, friction: 100, duration: 800 },
+  });
 
   const {
     fogColor,
@@ -54,109 +68,185 @@ const LandingPage = ({ isMusicOn, setIsMusicOn }) => {
     }),
   });
 
-  useEffect(() => {
-    // Initialize audio when the component mounts
-    const listener = new THREE.AudioListener();
-    const audio = new THREE.Audio(listener);
-    const audioLoader = new THREE.AudioLoader();
+  const initializeAudio = async () => {
+    if (!listenerRef.current) {
+      listenerRef.current = new THREE.AudioListener();
+    }
 
-    audioLoader.load("/audio/landing.mp3", (buffer) => {
-      audio.setBuffer(buffer);
-      audio.setLoop(true);
-      audio.setVolume(0.2);
-      audioRef.current = audio;
-    });
+    if (!audioRef.current) {
+      audioRef.current = new THREE.Audio(listenerRef.current);
+    }
 
-    return () => {
-      if (audioRef.current) audioRef.current.stop();
-    };
-  }, []);
+    try {
+      const audioLoader = new THREE.AudioLoader();
+      const buffer = await new Promise((resolve, reject) => {
+        audioLoader.load("/audio/landing.mp3", resolve, undefined, reject);
+      });
 
-  const toggleMusic = () => {
-    if (audioRef.current) {
+      audioRef.current.setBuffer(buffer);
+      audioRef.current.setLoop(true);
+      audioRef.current.setVolume(0.2);
+      setIsAudioInitialized(true);
+
       if (isMusicOn) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
+        await audioRef.current.play();
       }
-      setIsMusicOn((prev) => !prev); // Use functional state update
+    } catch (error) {
+      console.error("Error initializing audio:", error);
     }
   };
 
-  return (
-    <div id="landing-page">
-      <div className="nav-row">
-        <div className="dev">
-          <p className="developer">
-            Creative story experiment built with three.js & R3F by SahilK-027
-          </p>
-          <p className="headphone-info">
-            Use <i className="fa-solid fa-headphones"></i> for immersive
-            experience
-          </p>
-        </div>
-        <div className="music-bars" onClick={toggleMusic}>
-          <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
-          <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
-          <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
-        </div>
-      </div>
-      <div className="footer-row">
-        <div className="experience-name">
-          <h1 className="neon">The</h1>
-          <h1 className="neon">Neon Christmas</h1>
-        </div>
-        <div className="enter-button">
-          <button>Enter</button>
-          <h2>Explore the life of Jesus</h2>
-        </div>
-      </div>
+  const loadBackgroundMusic = async () => {
+    try {
+      if (!audioRef.current || !isAudioInitialized) return;
 
-      <Canvas dpr={[1, 1.5]}>
-        <color attach="background" args={["#121316"]} />
-        <OrbitControls />
-        <LightingAndEffects
-          ambientLightIntensity={ambientLightIntensity}
-          fogColor={fogColor}
-          fogNear={fogNear}
-          fogFar={fogFar}
-          luminanceThreshold1={luminanceThreshold1}
-          intensity1={intensity1}
-          luminanceThreshold2={luminanceThreshold2}
-          intensity2={intensity2}
-        />
-        <group position={[0, -0.7, 0]}>
-          <Parallax startParallax={true}>
-            <NeonModel
-              modelPath={primitivesData[currentModel].path}
-              curveConfigs={primitivesData[currentModel].shaders}
-            />
-            <Backdrop
-              floor={2}
-              position={[
-                backDropPositionX,
-                backDropPositionY,
-                backDropPositionZ,
-              ]}
-              scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
-            >
-              <meshStandardMaterial
-                color={backdropColor}
-                envMapIntensity={0.1}
-              />
-            </Backdrop>
-          </Parallax>
-          <Ground
-            mirror={1}
-            blur={[400, 100]}
-            mixBlur={12}
-            mixStrength={1.5}
-            rotation={[-Math.PI / 2, 0, Math.PI / 2]}
-            position={[0, -0.4, 0]}
+      audioRef.current.stop();
+      const audioLoader = new THREE.AudioLoader();
+      const buffer = await new Promise((resolve, reject) => {
+        audioLoader.load("/audio/bg.mp3", resolve, undefined, reject);
+      });
+
+      audioRef.current.setBuffer(buffer);
+      audioRef.current.setLoop(true);
+      audioRef.current.setVolume(0.8);
+
+      // Always play background music when entering story
+      await audioRef.current.play();
+      if (!isMusicOn) {
+        setIsMusicOn(true);
+      }
+    } catch (error) {
+      console.error("Error loading background music:", error);
+    }
+  };
+
+  useEffect(() => {
+    initializeAudio();
+
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.stop();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (enterStory) {
+      loadBackgroundMusic();
+    }
+  }, [enterStory]);
+
+  const toggleMusic = async () => {
+    if (!audioRef.current || !isAudioInitialized) {
+      await initializeAudio();
+    }
+
+    try {
+      if (isMusicOn) {
+        audioRef.current.pause();
+      } else {
+        await audioRef.current.play();
+      }
+      setIsMusicOn(!isMusicOn);
+    } catch (error) {
+      console.error("Error toggling audio:", error);
+    }
+  };
+
+  const enterToStory = () => {
+    setEnterStory(true);
+  };
+
+  return (
+    <animated.div
+      style={{
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#000",
+        zIndex: 3,
+        ...landingSpring,
+      }}
+    >
+      <div id="landing-page">
+        <div className="nav-row">
+          <div className="dev">
+            <p className="developer">
+              Creative story experiment built with three.js & R3F by SahilK-027
+            </p>
+            <p className="headphone-info">
+              Use <i className="fa-solid fa-headphones"></i> for immersive
+              experience
+            </p>
+          </div>
+          <div className="music-bars" onClick={toggleMusic}>
+            <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
+            <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
+            <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
+          </div>
+        </div>
+        <div className="footer-row">
+          <div className="experience-name">
+            <h1 className="neon">The</h1>
+            <h1 className="neon">Neon Christmas</h1>
+          </div>
+          <div className="enter-button">
+            <button onClick={enterToStory}>Enter</button>
+            <h2>Explore the life of Jesus</h2>
+          </div>
+        </div>
+
+        <Canvas dpr={[1, 1.5]}>
+          <color attach="background" args={["#121316"]} />
+          <OrbitControls />
+          <LightingAndEffects
+            ambientLightIntensity={ambientLightIntensity}
+            fogColor={fogColor}
+            fogNear={fogNear}
+            fogFar={fogFar}
+            luminanceThreshold1={luminanceThreshold1}
+            intensity1={intensity1}
+            luminanceThreshold2={luminanceThreshold2}
+            intensity2={intensity2}
           />
-        </group>
-      </Canvas>
-    </div>
+          <group position={[0, -0.7, 0]}>
+            <Parallax startParallax={true}>
+              <NeonModel
+                modelPath={primitivesData[currentModel].path}
+                curveConfigs={primitivesData[currentModel].shaders}
+              />
+              <Backdrop
+                floor={2}
+                position={[
+                  backDropPositionX,
+                  backDropPositionY,
+                  backDropPositionZ,
+                ]}
+                scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+              >
+                <meshStandardMaterial
+                  color={backdropColor}
+                  envMapIntensity={0.1}
+                />
+              </Backdrop>
+            </Parallax>
+            <Ground
+              mirror={1}
+              blur={[400, 100]}
+              mixBlur={12}
+              mixStrength={1.5}
+              rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+              position={[0, -0.4, 0]}
+            />
+          </group>
+        </Canvas>
+      </div>
+    </animated.div>
   );
 };
 

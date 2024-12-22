@@ -12,6 +12,7 @@ const App = () => {
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMusicOn, setIsMusicOn] = useState(false);
+  const [enterStory, setEnterStory] = useState(false);
 
   const loaderSpring = useSpring({
     transform: isLoading ? "translateY(0%)" : "translateY(-100%)",
@@ -56,6 +57,7 @@ const App = () => {
     audioLoader.load("/audio/baptism.mp3", () => {});
     audioLoader.load("/audio/birth.mp3", () => {});
     audioLoader.load("/audio/crucifixion.mp3", () => {});
+    audioLoader.load("/audio/landing.mp3", () => {});
   }, []);
 
   useEffect(() => {
@@ -112,14 +114,19 @@ const App = () => {
           alignItems: "center",
           justifyContent: "center",
           background: "#000",
-          zIndex: 10,
+          zIndex: 5,
           ...loaderSpring,
         }}
       >
         <Loader progress={loadingProgress} />
       </animated.div>
-      <LandingPage isMusicOn={isMusicOn} setIsMusicOn={setIsMusicOn} />
-      <StoryCanvas startStory={!isLoading} startParallax={!isLoading} />
+      <LandingPage
+        enterStory={enterStory}
+        setEnterStory={setEnterStory}
+        isMusicOn={isMusicOn}
+        setIsMusicOn={setIsMusicOn}
+      />
+      <StoryCanvas startStory={enterStory} startParallax={enterStory} />
     </>
   );
 };
