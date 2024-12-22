@@ -10,8 +10,6 @@ import LandingPage from "./components/LandingPage/LandingPage";
 const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
-  const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isMusicOn, setIsMusicOn] = useState(false);
   const [enterStory, setEnterStory] = useState(false);
 
   const loaderSpring = useSpring({
@@ -57,49 +55,7 @@ const App = () => {
     audioLoader.load("/audio/baptism.mp3", () => {});
     audioLoader.load("/audio/birth.mp3", () => {});
     audioLoader.load("/audio/crucifixion.mp3", () => {});
-    audioLoader.load("/audio/landing.mp3", () => {});
   }, []);
-
-  useEffect(() => {
-    const handleKeydown = (event) => {
-      if (event.key === "f") {
-        if (!isFullscreen) {
-          const elem = document.documentElement; // Entire page
-          if (elem.requestFullscreen) {
-            elem.requestFullscreen();
-          } else if (elem.webkitRequestFullscreen) {
-            elem.webkitRequestFullscreen(); // For Safari
-          } else if (elem.msRequestFullscreen) {
-            elem.msRequestFullscreen(); // For IE11
-          }
-          setIsFullscreen(true);
-        } else {
-          if (document.exitFullscreen) {
-            document.exitFullscreen();
-          } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen(); // For Safari
-          } else if (document.msExitFullscreen) {
-            document.msExitFullscreen(); // For IE11
-          }
-          setIsFullscreen(false);
-        }
-      } else if (event.key === "Escape") {
-        if (document.exitFullscreen) {
-          document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-          document.webkitExitFullscreen(); // For Safari
-        } else if (document.msExitFullscreen) {
-          document.msExitFullscreen(); // For IE11
-        }
-        setIsFullscreen(false);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeydown);
-    return () => {
-      window.removeEventListener("keydown", handleKeydown);
-    };
-  }, [isFullscreen]);
 
   return (
     <>
@@ -120,12 +76,7 @@ const App = () => {
       >
         <Loader progress={loadingProgress} />
       </animated.div>
-      <LandingPage
-        enterStory={enterStory}
-        setEnterStory={setEnterStory}
-        isMusicOn={isMusicOn}
-        setIsMusicOn={setIsMusicOn}
-      />
+      <LandingPage enterStory={enterStory} setEnterStory={setEnterStory} />
       <StoryCanvas startStory={enterStory} startParallax={enterStory} />
     </>
   );

@@ -11,21 +11,32 @@ import primitivesData from "../../utils/primitivesData";
 import * as THREE from "three";
 import { useSpring, animated } from "@react-spring/web";
 
-const LandingPage = ({
-  enterStory,
-  setEnterStory,
-  isMusicOn,
-  setIsMusicOn,
-}) => {
+const LandingPage = ({ enterStory, setEnterStory }) => {
   const [currentModel, setCurrentModel] = useState("xMasModel");
-  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
-  const audioRef = useRef(null);
-  const listenerRef = useRef(null);
+  const [shouldDisplay, setShouldDisplay] = useState(true);
+  const [IsFullScreen, setIsFullScreen] = useState(false);
+  const audioRef = useRef(new Audio("/audio/bg.mp3"));
+
+  useEffect(() => {
+    // Configure audio
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.05;
+
+    // Cleanup on unmount
+    return () => {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    };
+  }, []);
 
   const landingSpring = useSpring({
-    // transform: enterStory ? "translateY(-100%)" : "translateY(0%)",
     opacity: enterStory ? 0 : 1,
     config: { tension: 100, friction: 100, duration: 800 },
+    onRest: () => {
+      if (enterStory) {
+        setShouldDisplay(false);
+      }
+    },
   });
 
   const {
@@ -68,92 +79,39 @@ const LandingPage = ({
     }),
   });
 
-  const initializeAudio = async () => {
-    if (!listenerRef.current) {
-      listenerRef.current = new THREE.AudioListener();
-    }
-
-    if (!audioRef.current) {
-      audioRef.current = new THREE.Audio(listenerRef.current);
-    }
-
-    try {
-      const audioLoader = new THREE.AudioLoader();
-      const buffer = await new Promise((resolve, reject) => {
-        audioLoader.load("/audio/landing.mp3", resolve, undefined, reject);
-      });
-
-      audioRef.current.setBuffer(buffer);
-      audioRef.current.setLoop(true);
-      audioRef.current.setVolume(0.2);
-      setIsAudioInitialized(true);
-
-      if (isMusicOn) {
-        await audioRef.current.play();
+  const enterFullScreen = () => {
+    if (!IsFullScreen) {
+      const elem = document.documentElement; // Entire page
+      if (elem.requestFullscreen) {
+        elem.requestFullscreen();
+      } else if (elem.webkitRequestFullscreen) {
+        elem.webkitRequestFullscreen(); // For Safari
+      } else if (elem.msRequestFullscreen) {
+        elem.msRequestFullscreen(); // For IE11
       }
-    } catch (error) {
-      console.error("Error initializing audio:", error);
+      setIsFullScreen(true);
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen(); // For Safari
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen(); // For IE11
+      }
+      setIsFullScreen(false);
     }
   };
 
-  const loadBackgroundMusic = async () => {
-    try {
-      if (!audioRef.current || !isAudioInitialized) return;
-
-      audioRef.current.stop();
-      const audioLoader = new THREE.AudioLoader();
-      const buffer = await new Promise((resolve, reject) => {
-        audioLoader.load("/audio/bg.mp3", resolve, undefined, reject);
-      });
-
-      audioRef.current.setBuffer(buffer);
-      audioRef.current.setLoop(true);
-      audioRef.current.setVolume(0.8);
-
-      // Always play background music when entering story
-      await audioRef.current.play();
-      if (!isMusicOn) {
-        setIsMusicOn(true);
-      }
-    } catch (error) {
-      console.error("Error loading background music:", error);
-    }
-  };
-
-  useEffect(() => {
-    initializeAudio();
-
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.stop();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (enterStory) {
-      loadBackgroundMusic();
-    }
-  }, [enterStory]);
-
-  const toggleMusic = async () => {
-    if (!audioRef.current || !isAudioInitialized) {
-      await initializeAudio();
-    }
-
-    try {
-      if (isMusicOn) {
-        audioRef.current.pause();
-      } else {
-        await audioRef.current.play();
-      }
-      setIsMusicOn(!isMusicOn);
-    } catch (error) {
-      console.error("Error toggling audio:", error);
-    }
+  const playBgMusic = () => {
+    const audio = audioRef.current;
+    audio.play().catch((error) => {
+      console.error("Audio playback failed:", error);
+    });
   };
 
   const enterToStory = () => {
+    playBgMusic();
+    enterFullScreen();
     setEnterStory(true);
   };
 
@@ -165,11 +123,11 @@ const LandingPage = ({
         left: 0,
         right: 0,
         bottom: 0,
-        display: "flex",
         alignItems: "center",
         justifyContent: "center",
         background: "#000",
-        zIndex: 3,
+        zIndex: 4,
+        display: shouldDisplay ? "flex" : "none",
         ...landingSpring,
       }}
     >
@@ -183,11 +141,6 @@ const LandingPage = ({
               Use <i className="fa-solid fa-headphones"></i> for immersive
               experience
             </p>
-          </div>
-          <div className="music-bars" onClick={toggleMusic}>
-            <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
-            <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
-            <span className={`stroke ${isMusicOn ? "active" : ""}`}></span>
           </div>
         </div>
         <div className="footer-row">
