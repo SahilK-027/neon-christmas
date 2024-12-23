@@ -15,6 +15,8 @@ import "./StoryCanvas.scss";
 
 const StoryCanvas = ({ startStory, startParallax }) => {
   const [currentModel, setCurrentModel] = useState("birthModel");
+  const [progressPercentage, setProgressPercentage] = useState(0);
+
   const {
     fogColor,
     fogNear,
@@ -62,6 +64,7 @@ const StoryCanvas = ({ startStory, startParallax }) => {
           start={startStory}
           currentModel={currentModel}
           setCurrentModel={setCurrentModel}
+          setProgressPercentage={setProgressPercentage}
         />
         <Leva collapsed />
         <Canvas dpr={[1, 1.5]}>
@@ -120,7 +123,7 @@ const StoryCanvas = ({ startStory, startParallax }) => {
           </group>
         </Canvas>
 
-        <StoryProgressBar />
+        <StoryProgressBar progressPercentage={progressPercentage} />
       </div>
     </>
   );

@@ -1,9 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import "./Story.scss";
 import { useTrail, animated, useSpring } from "@react-spring/web";
 import stories from "../../../utils/storyData.js";
 
-const Story = ({ start, currentModel, setCurrentModel }) => {
+const Story = ({
+  start,
+  currentModel,
+  setCurrentModel,
+  setProgressPercentage,
+}) => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -15,13 +20,18 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
     stories[0]?.storyName || "Untitled"
   );
 
-  // Extract current story and line duration
   const currentStory = stories[currentStoryIndex]?.storyArray || [];
   const lineDuration = stories[currentStoryIndex]?.lineDuration || [];
   const storyName = stories[currentStoryIndex]?.storyName || "Untitled";
   const voiceOver = stories[currentStoryIndex]?.voiceOver || "";
 
+  useEffect(() => {
+    setDisplayedStoryName(stories[currentStoryIndex]?.storyName || "Untitled");
+  }, [currentStoryIndex]);
+
   const words = currentStory[currentLineIndex]?.split(" ") || [];
+
+  const STORY_WEIGHT = 25; // Each story contributes exactly 25% to total progress
 
   // Trail animation for words
   const trail = useTrail(words.length, {
@@ -31,7 +41,6 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
     delay: 0,
   });
 
-  // Smooth animation for story name
   const storyNameAnimation = useSpring({
     opacity: showStoryName ? 1 : 0,
     config: { tension: 20, friction: 10, duration: 2000 },
@@ -42,7 +51,63 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
     },
   });
 
-  // Set up the audio source and play state
+  useEffect(() => {
+    let intervalId;
+    if (start && !shouldDisplayStoryName) {
+      // Calculate base progress from completed stories
+      const storyStartProgress = currentStoryIndex * STORY_WEIGHT;
+
+      // For the last line of the story, ensure we hit exactly the story boundary
+      const isLastLine = currentLineIndex === currentStory.length - 1;
+
+      // Calculate progress within current story (0 to STORY_WEIGHT)
+      let lineStartProgress, lineEndProgress;
+
+      if (isLastLine) {
+        // For the last line, end exactly at the story boundary
+        lineStartProgress =
+          storyStartProgress +
+          (currentLineIndex / currentStory.length) * STORY_WEIGHT;
+        lineEndProgress = (currentStoryIndex + 1) * STORY_WEIGHT;
+      } else {
+        lineStartProgress =
+          storyStartProgress +
+          (currentLineIndex / currentStory.length) * STORY_WEIGHT;
+        lineEndProgress =
+          storyStartProgress +
+          ((currentLineIndex + 1) / currentStory.length) * STORY_WEIGHT;
+      }
+
+      const lineStartTime = Date.now();
+      const lineEndTime = lineStartTime + lineDuration[currentLineIndex];
+      setProgressPercentage(lineStartProgress);
+
+      intervalId = setInterval(() => {
+        const now = Date.now();
+        if (now >= lineEndTime) {
+          setProgressPercentage(lineEndProgress);
+          clearInterval(intervalId);
+        } else {
+          const elapsedTime = now - lineStartTime;
+          const lineProgress =
+            lineStartProgress +
+            (elapsedTime / lineDuration[currentLineIndex]) *
+              (lineEndProgress - lineStartProgress);
+          setProgressPercentage(Math.min(lineProgress, 100));
+        }
+      }, 100);
+    }
+    return () => clearInterval(intervalId);
+  }, [
+    currentLineIndex,
+    currentStoryIndex,
+    lineDuration,
+    start,
+    setProgressPercentage,
+    shouldDisplayStoryName,
+    currentStory.length,
+  ]);
+
   useEffect(() => {
     if (voiceOver && start) {
       setCurrentAudio(voiceOver);
@@ -58,18 +123,11 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
     }
   }, [voiceOver, start]);
 
-  // Update displayed story name when transitioning
-  useEffect(() => {
-    if (showStoryName) {
-      setDisplayedStoryName(storyName);
-    }
-  }, [showStoryName, storyName]);
-
   useEffect(() => {
     if (start) {
       if (showStoryName) {
         setShouldDisplayStoryName(true);
-        // Hide story name after 4 seconds
+
         const storyNameTimer = setTimeout(() => {
           setShowStoryName(false);
         }, 4000);
@@ -78,12 +136,9 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
       }
 
       if (currentLineIndex >= currentStory.length) {
-        // Move to the next story if available
         if (currentStoryIndex + 1 < stories.length) {
-          // First fade out current content
           setIsVisible(false);
 
-          // Then transition to new story with delay
           setTimeout(() => {
             setShowStoryName(true);
             setShouldDisplayStoryName(true);
@@ -98,7 +153,6 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
         return;
       }
 
-      // Show and hide the current line
       const showTimer = setTimeout(() => {
         setIsVisible(true);
       }, 500);
@@ -107,7 +161,6 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
         setIsVisible(false);
       }, lineDuration[currentLineIndex]);
 
-      // Move to the next line
       const nextLineTimer = setTimeout(() => {
         setCurrentLineIndex((prev) => prev + 1);
       }, lineDuration[currentLineIndex] + 1800);

@@ -30,6 +30,36 @@ const stories = [
     modelName: "baptismModel",
     voiceOver: "/audio/baptism.mp3",
   },
+  {
+    storyName: "Crucifixion",
+    storyArray: [
+      ``,
+      `The crucifixion was the darkest yet most significant moment in Jesus’ life.`,
+      `After being betrayed by Judas, arrested, and condemned, Jesus was sentenced to death by crucifixion.`,
+      `He carried His cross through the streets of Jerusalem, burdened by the weight of humanity’s sins.`,
+      `Nailed to the cross, He endured excruciating pain, yet forgave those who wronged Him.`,
+      `As He breathed His last, the sky darkened, and the temple veil tore.`,
+      ` His death marked the ultimate sacrifice for mankind’s redemption, fulfilling God's promise of salvation.`,
+    ],
+    lineDuration: [500, 4800, 6000, 5500, 4500, 3500, 6000],
+    modelName: "baptismModel",
+    voiceOver: "/audio/crucifixion.mp3",
+  },
+  {
+    storyName: "Ascension to Heaven",
+    storyArray: [
+      ``,
+      `After His resurrection, Jesus appeared to His disciples over 40 days, teaching them and strengthening their faith.`,
+      `One day, He led them to the Mount of Olives near Jerusalem.`,
+      `There, He gave them final instructions, telling them to spread His message to all nations.`,
+      `As they watched in awe, Jesus was lifted up into the sky, a cloud taking Him from their sight.`,
+      `Two angels appeared, reassuring them that He would return in the same way.`,
+      `With that, His earthly presence ended, and He ascended to reign in Heaven.`,
+    ],
+    lineDuration: [500, 4800, 6000, 5500, 4500, 3500, 6000],
+    modelName: "baptismModel",
+    voiceOver: "/audio/ascension.mp3",
+  },
 ];
 
 export default stories;
