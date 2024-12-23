@@ -9,12 +9,17 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [showStoryName, setShowStoryName] = useState(true);
   const [shouldDisplayStoryName, setShouldDisplayStoryName] = useState(true);
+  const [currentAudio, setCurrentAudio] = useState("");
+  const [shouldPlayAudio, setShouldPlayAudio] = useState(false);
+  const [displayedStoryName, setDisplayedStoryName] = useState(
+    stories[0]?.storyName || "Untitled"
+  );
 
   // Extract current story and line duration
   const currentStory = stories[currentStoryIndex]?.storyArray || [];
   const lineDuration = stories[currentStoryIndex]?.lineDuration || [];
   const storyName = stories[currentStoryIndex]?.storyName || "Untitled";
-  const model = stories[currentStoryIndex]?.modelName || "";
+  const voiceOver = stories[currentStoryIndex]?.voiceOver || "";
 
   const words = currentStory[currentLineIndex]?.split(" ") || [];
 
@@ -37,11 +42,34 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
     },
   });
 
+  // Set up the audio source and play state
+  useEffect(() => {
+    if (voiceOver && start) {
+      setCurrentAudio(voiceOver);
+
+      const audioTimer = setTimeout(() => {
+        setShouldPlayAudio(true);
+      }, 8000);
+
+      return () => {
+        clearTimeout(audioTimer);
+        setShouldPlayAudio(false);
+      };
+    }
+  }, [voiceOver, start]);
+
+  // Update displayed story name when transitioning
+  useEffect(() => {
+    if (showStoryName) {
+      setDisplayedStoryName(storyName);
+    }
+  }, [showStoryName, storyName]);
+
   useEffect(() => {
     if (start) {
       if (showStoryName) {
         setShouldDisplayStoryName(true);
-        // Hide story name after 3 seconds
+        // Hide story name after 4 seconds
         const storyNameTimer = setTimeout(() => {
           setShowStoryName(false);
         }, 4000);
@@ -52,16 +80,21 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
       if (currentLineIndex >= currentStory.length) {
         // Move to the next story if available
         if (currentStoryIndex + 1 < stories.length) {
-          setShowStoryName(true);
-          setShouldDisplayStoryName(true);
+          // First fade out current content
+          setIsVisible(false);
+
+          // Then transition to new story with delay
           setTimeout(() => {
+            setShowStoryName(true);
+            setShouldDisplayStoryName(true);
             const nextStoryIndex = currentStoryIndex + 1;
             setCurrentStoryIndex(nextStoryIndex);
-            setCurrentModel(stories[nextStoryIndex]?.modelName || "");
+            setTimeout(() => {
+              setCurrentModel(stories[nextStoryIndex]?.modelName || "");
+            }, 2000);
+            setCurrentLineIndex(0);
           }, 2000);
-          setCurrentLineIndex(0);
         }
-        // TODO: Else replay story
         return;
       }
 
@@ -77,7 +110,7 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
       // Move to the next line
       const nextLineTimer = setTimeout(() => {
         setCurrentLineIndex((prev) => prev + 1);
-      }, lineDuration[currentLineIndex] + 2000);
+      }, lineDuration[currentLineIndex] + 1800);
 
       return () => {
         clearTimeout(showTimer);
@@ -114,7 +147,7 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
               }}
               className="story-name-overlay"
             >
-              <h1>{storyName}</h1>
+              <h1>{displayedStoryName}</h1>
             </animated.div>
           ) : (
             <div className="story-overlay-text">
@@ -126,6 +159,9 @@ const Story = ({ start, currentModel, setCurrentModel }) => {
                 ))}
               </div>
             </div>
+          )}
+          {shouldPlayAudio && (
+            <audio src={currentAudio} autoPlay key={currentAudio} />
           )}
         </div>
       ) : null}
