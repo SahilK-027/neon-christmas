@@ -1,8 +1,4 @@
-import {
-  Backdrop,
-  OrbitControls,
-  useGLTF,
-} from "@react-three/drei";
+import { Backdrop, OrbitControls, useGLTF } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { folder, Leva, useControls } from "leva";
 import { Perf } from "r3f-perf";
@@ -15,7 +11,7 @@ import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import NeonModel from "../NeonModel/NeonModel";
 import primitivesData from "../../utils/primitivesData";
 import StoryProgressBar from "./StoryProgressBar/StoryProgressBar";
-import "./StoryCanvas.scss"
+import "./StoryCanvas.scss";
 
 const StoryCanvas = ({ startStory, startParallax }) => {
   const [currentModel, setCurrentModel] = useState("birthModel");
@@ -62,7 +58,11 @@ const StoryCanvas = ({ startStory, startParallax }) => {
   return (
     <>
       <div id="story-board">
-        <Story start={startStory} />
+        <Story
+          start={startStory}
+          currentModel={currentModel}
+          setCurrentModel={setCurrentModel}
+        />
         <Leva collapsed />
         <Canvas dpr={[1, 1.5]}>
           {/* Setup */}

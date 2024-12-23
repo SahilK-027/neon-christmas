@@ -3,7 +3,7 @@ import "./Story.scss";
 import { useTrail, animated, useSpring } from "@react-spring/web";
 import stories from "../../../utils/storyData.js";
 
-const Story = ({ start }) => {
+const Story = ({ start, currentModel, setCurrentModel }) => {
   const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
   const [currentLineIndex, setCurrentLineIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
@@ -14,6 +14,7 @@ const Story = ({ start }) => {
   const currentStory = stories[currentStoryIndex]?.storyArray || [];
   const lineDuration = stories[currentStoryIndex]?.lineDuration || [];
   const storyName = stories[currentStoryIndex]?.storyName || "Untitled";
+  const model = stories[currentStoryIndex]?.modelName || "";
 
   const words = currentStory[currentLineIndex]?.split(" ") || [];
 
@@ -53,7 +54,11 @@ const Story = ({ start }) => {
         if (currentStoryIndex + 1 < stories.length) {
           setShowStoryName(true);
           setShouldDisplayStoryName(true);
-          setCurrentStoryIndex((prev) => prev + 1);
+          setTimeout(() => {
+            const nextStoryIndex = currentStoryIndex + 1;
+            setCurrentStoryIndex(nextStoryIndex);
+            setCurrentModel(stories[nextStoryIndex]?.modelName || "");
+          }, 2000);
           setCurrentLineIndex(0);
         }
         // TODO: Else replay story
@@ -87,6 +92,7 @@ const Story = ({ start }) => {
     lineDuration,
     currentStoryIndex,
     showStoryName,
+    currentModel,
   ]);
 
   return (
