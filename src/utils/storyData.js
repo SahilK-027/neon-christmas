@@ -42,7 +42,7 @@ const stories = [
       ` His death marked the ultimate sacrifice for mankind’s redemption, fulfilling God's promise of salvation.`,
     ],
     lineDuration: [500, 4800, 6000, 5500, 4500, 3500, 6000],
-    modelName: "baptismModel",
+    modelName: "crucifixionModel",
     voiceOver: "/audio/crucifixion.mp3",
   },
   {

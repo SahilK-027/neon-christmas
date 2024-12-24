@@ -46,6 +46,32 @@ const primitivesData = {
     },
     fogColor: "#3f1752",
   },
+  crucifixionModel: {
+    path: "/models/crucifixion.glb",
+    shaders: {
+      curve1: {
+        defaultColorA: "#fffef1",
+        defaultColorB: "#fffbe9",
+        defaultIntensity: 4.5,
+      },
+      curve2: {
+        defaultColorA: "#ff8465",
+        defaultColorB: "#fc5d5d",
+        defaultIntensity: 2.4,
+      },
+      curve3: {
+        defaultColorA: "#ffffff",
+        defaultColorB: "#fff4b1",
+        defaultIntensity: 1.7,
+      },
+      curve4: {
+        defaultColorA: "#7cff99",
+        defaultColorB: "#02a7a7",
+        defaultIntensity: 1.3,
+      },
+    },
+    fogColor: "#4e1a0f",
+  },
   baptismModel: {
     path: "/models/monkey.glb",
     shaders: {

@@ -6,7 +6,7 @@ import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import Parallax from "../Parallax/Parallax";
 import NeonModel from "../NeonModel/NeonModel";
 import Ground from "../Ground/Ground";
-import { folder, useControls } from "leva";
+import { folder, Leva, useControls } from "leva";
 import primitivesData from "../../utils/primitivesData";
 import { useSpring, animated } from "@react-spring/web";
 
@@ -154,6 +154,7 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
         </div>
 
         <Canvas dpr={[1, 1.5]}>
+          {/* <Leva />  */}
           <color attach="background" args={["#121316"]} />
           <OrbitControls />
           <LightingAndEffects
