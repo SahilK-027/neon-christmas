@@ -102,9 +102,9 @@ const primitivesData = {
     path: "/models/ascension.glb",
     shaders: {
       curve1: {
-        defaultColorA: "#ffbfbf",
-        defaultColorB: "#ffce84",
-        defaultIntensity: 2.0,
+        defaultColorA: "#ffdfdf",
+        defaultColorB: "#ffedd2",
+        defaultIntensity: 4.0,
       },
       curve2: {
         defaultColorA: "#996bff",
@@ -112,8 +112,8 @@ const primitivesData = {
         defaultIntensity: 1.4,
       },
       curve3: {
-        defaultColorA: "#a7ffb4",
-        defaultColorB: "#ccffb0",
+        defaultColorA: "#5ae26f",
+        defaultColorB: "#12e2b3",
         defaultIntensity: 1.5,
       },
       curve4: {
@@ -122,7 +122,7 @@ const primitivesData = {
         defaultIntensity: 2.5,
       },
     },
-    fogColor: "#0f294f",
+    fogColor: "#3e2903",
   },
 };
 

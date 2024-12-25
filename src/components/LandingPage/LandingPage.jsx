@@ -6,23 +6,33 @@ import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import Parallax from "../Parallax/Parallax";
 import NeonModel from "../NeonModel/NeonModel";
 import Ground from "../Ground/Ground";
-import { folder, Leva, useControls } from "leva";
 import primitivesData from "../../utils/primitivesData";
 import { useSpring, animated } from "@react-spring/web";
 
 const LandingPage = ({ enterStory, setEnterStory }) => {
-  // const [currentModel, setCurrentModel] = useState("ascensionModel");
   const [currentModel, setCurrentModel] = useState("xMasModel");
   const [shouldDisplay, setShouldDisplay] = useState(true);
   const [IsFullScreen, setIsFullScreen] = useState(false);
   const audioRef = useRef(new Audio("/audio/bg.mp3"));
 
+  const sceneConfig = {
+    fogColor: primitivesData[currentModel].fogColor,
+    fogNear: 7.1,
+    fogFar: 20.3,
+    ambientLightIntensity: 1,
+    luminanceThreshold1: 0.2,
+    intensity1: 0.3,
+    luminanceThreshold2: 0,
+    intensity2: 0.2,
+    backDropPosition: [0, -0.5, -4.75],
+    backDropScale: [50, 10, 5],
+    backdropColor: "#121316",
+  };
+
   useEffect(() => {
-    // Configure audio
     audioRef.current.loop = true;
     audioRef.current.volume = 0.05;
 
-    // Cleanup on unmount
     return () => {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -39,64 +49,24 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
     },
   });
 
-  const {
-    fogColor,
-    fogNear,
-    fogFar,
-    ambientLightIntensity,
-    luminanceThreshold1,
-    intensity1,
-    luminanceThreshold2,
-    intensity2,
-    backDropPositionX,
-    backDropPositionY,
-    backDropPositionZ,
-    backDropScaleX,
-    backDropScaleY,
-    backDropScaleZ,
-    backdropColor,
-  } = useControls({
-    scene: folder({
-      fogColor: { value: primitivesData[currentModel].fogColor },
-      fogNear: { value: 7.1, min: 1, max: 10, step: 0.01 },
-      fogFar: { value: 20.3, min: 1, max: 50, step: 0.01 },
-      ambientLightIntensity: { value: 1, min: 0, max: 5, step: 0.01 },
-    }),
-    bloom: folder({
-      luminanceThreshold1: { value: 0.2, min: 0, max: 1, step: 0.001 },
-      intensity1: { value: 0.3, min: 0, max: 1, step: 0.001 },
-      luminanceThreshold2: { value: 0, min: 0, max: 1, step: 0.001 },
-      intensity2: { value: 0.2, min: 0, max: 1, step: 0.001 },
-    }),
-    backDrop: folder({
-      backDropPositionX: { value: 0, min: 0, max: 10, step: 0.001 },
-      backDropPositionY: { value: -0.5, min: -2, max: 2, step: 0.001 },
-      backDropPositionZ: { value: -4.75, min: -5, max: 5, step: 0.001 },
-      backDropScaleX: { value: 50, min: 0, max: 100, step: 0.001 },
-      backDropScaleY: { value: 10, min: 0, max: 50, step: 0.001 },
-      backDropScaleZ: { value: 5, min: 0, max: 10, step: 0.001 },
-      backdropColor: { value: "#121316" },
-    }),
-  });
-
   const enterFullScreen = () => {
     if (!IsFullScreen) {
-      const elem = document.documentElement; // Entire page
+      const elem = document.documentElement;
       if (elem.requestFullscreen) {
         elem.requestFullscreen();
       } else if (elem.webkitRequestFullscreen) {
-        elem.webkitRequestFullscreen(); // For Safari
+        elem.webkitRequestFullscreen();
       } else if (elem.msRequestFullscreen) {
-        elem.msRequestFullscreen(); // For IE11
+        elem.msRequestFullscreen();
       }
       setIsFullScreen(true);
     } else {
       if (document.exitFullscreen) {
         document.exitFullscreen();
       } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen(); // For Safari
+        document.webkitExitFullscreen();
       } else if (document.msExitFullscreen) {
-        document.msExitFullscreen(); // For IE11
+        document.msExitFullscreen();
       }
       setIsFullScreen(false);
     }
@@ -155,18 +125,17 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
         </div>
 
         <Canvas dpr={[1, 1.5]}>
-          {/* <Leva />  */}
           <color attach="background" args={["#121316"]} />
           <OrbitControls />
           <LightingAndEffects
-            ambientLightIntensity={ambientLightIntensity}
-            fogColor={fogColor}
-            fogNear={fogNear}
-            fogFar={fogFar}
-            luminanceThreshold1={luminanceThreshold1}
-            intensity1={intensity1}
-            luminanceThreshold2={luminanceThreshold2}
-            intensity2={intensity2}
+            ambientLightIntensity={sceneConfig.ambientLightIntensity}
+            fogColor={sceneConfig.fogColor}
+            fogNear={sceneConfig.fogNear}
+            fogFar={sceneConfig.fogFar}
+            luminanceThreshold1={sceneConfig.luminanceThreshold1}
+            intensity1={sceneConfig.intensity1}
+            luminanceThreshold2={sceneConfig.luminanceThreshold2}
+            intensity2={sceneConfig.intensity2}
           />
           <group position={[0, -0.7, 0]}>
             <Parallax startParallax={true}>
@@ -176,15 +145,11 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
               />
               <Backdrop
                 floor={2}
-                position={[
-                  backDropPositionX,
-                  backDropPositionY,
-                  backDropPositionZ,
-                ]}
-                scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+                position={sceneConfig.backDropPosition}
+                scale={sceneConfig.backDropScale}
               >
                 <meshStandardMaterial
-                  color={backdropColor}
+                  color={sceneConfig.backdropColor}
                   envMapIntensity={0.1}
                 />
               </Backdrop>

@@ -1,6 +1,6 @@
 const stories = [
   {
-    storyName: "Birth of Jesus",
+    storyName: "The Birth of Jesus Christ",
     storyArray: [
       "",
       "Jesus Christ was born in Bethlehem to Mary and Joseph, fulfilling a prophecy.",
@@ -15,7 +15,7 @@ const stories = [
     voiceOver: "/audio/birth.mp3",
   },
   {
-    storyName: "Baptism",
+    storyName: "The Baptism of Jesus",
     storyArray: [
       ``,
       `From the moment Jesus was born in a humble stable in Bethlehem,`,
@@ -31,7 +31,7 @@ const stories = [
     voiceOver: "/audio/baptism.mp3",
   },
   {
-    storyName: "Crucifixion",
+    storyName: "The Crucifixion of Jesus",
     storyArray: [
       ``,
       `The crucifixion was the darkest yet most significant moment in Jesus’ life.`,
@@ -46,7 +46,7 @@ const stories = [
     voiceOver: "/audio/crucifixion.mp3",
   },
   {
-    storyName: "Ascension to Heaven",
+    storyName: "The Ascension of Jesus to Heaven",
     storyArray: [
       ``,
       `After His resurrection, Jesus appeared to His disciples over 40 days, teaching them and strengthening their faith.`,
@@ -57,7 +57,7 @@ const stories = [
       `With that, His earthly presence ended, and He ascended to reign in Heaven.`,
     ],
     lineDuration: [500, 4800, 6000, 5500, 4500, 3500, 6000],
-    modelName: "baptismModel",
+    modelName: "ascensionModel",
     voiceOver: "/audio/ascension.mp3",
   },
 ];

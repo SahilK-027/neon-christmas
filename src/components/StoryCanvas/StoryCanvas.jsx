@@ -1,9 +1,6 @@
-import { Backdrop, OrbitControls, useGLTF } from "@react-three/drei";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { folder, Leva, useControls } from "leva";
-import { Perf } from "r3f-perf";
-import { useEffect, useMemo, useRef, useState } from "react";
-import * as THREE from "three";
+import { Backdrop, OrbitControls } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
+import { useState } from "react";
 import Story from "./Story/Story";
 import Ground from "../Ground/Ground";
 import Parallax from "../Parallax/Parallax";
@@ -17,45 +14,24 @@ const StoryCanvas = ({ startStory, startParallax }) => {
   const [currentModel, setCurrentModel] = useState("birthModel");
   const [progressPercentage, setProgressPercentage] = useState(0);
 
-  const {
-    fogColor,
-    fogNear,
-    fogFar,
-    ambientLightIntensity,
-    luminanceThreshold1,
-    intensity1,
-    luminanceThreshold2,
-    intensity2,
-    backDropPositionX,
-    backDropPositionY,
-    backDropPositionZ,
-    backDropScaleX,
-    backDropScaleY,
-    backDropScaleZ,
-    backdropColor,
-  } = useControls({
-    scene: folder({
-      fogColor: { value: primitivesData[currentModel].fogColor },
-      fogNear: { value: 7.1, min: 1, max: 10, step: 0.01 },
-      fogFar: { value: 20.3, min: 1, max: 50, step: 0.01 },
-      ambientLightIntensity: { value: 1, min: 0, max: 5, step: 0.01 },
-    }),
-    bloom: folder({
-      luminanceThreshold1: { value: 0.2, min: 0, max: 1, step: 0.001 },
-      intensity1: { value: 0.3, min: 0, max: 1, step: 0.001 },
-      luminanceThreshold2: { value: 0, min: 0, max: 1, step: 0.001 },
-      intensity2: { value: 0.2, min: 0, max: 1, step: 0.001 },
-    }),
-    backDrop: folder({
-      backDropPositionX: { value: 0, min: 0, max: 10, step: 0.001 },
-      backDropPositionY: { value: -0.5, min: -2, max: 2, step: 0.001 },
-      backDropPositionZ: { value: -4.75, min: -5, max: 5, step: 0.001 },
-      backDropScaleX: { value: 50, min: 0, max: 100, step: 0.001 },
-      backDropScaleY: { value: 10, min: 0, max: 50, step: 0.001 },
-      backDropScaleZ: { value: 5, min: 0, max: 10, step: 0.001 },
-      backdropColor: { value: "#121316" },
-    }),
-  });
+  const sceneConfig = {
+    // Scene settings
+    fogColor: primitivesData[currentModel].fogColor,
+    fogNear: 7.1,
+    fogFar: 20.3,
+    ambientLightIntensity: 1,
+
+    // Bloom settings
+    luminanceThreshold1: 0.2,
+    intensity1: 0.3,
+    luminanceThreshold2: 0,
+    intensity2: 0.2,
+
+    // Backdrop settings
+    backDropPosition: [0, -0.5, -4.75],
+    backDropScale: [50, 10, 5],
+    backdropColor: "#121316",
+  };
 
   return (
     <>
@@ -66,52 +42,40 @@ const StoryCanvas = ({ startStory, startParallax }) => {
           setCurrentModel={setCurrentModel}
           setProgressPercentage={setProgressPercentage}
         />
-        <Leva collapsed />
         <Canvas dpr={[1, 1.5]}>
-          {/* Setup */}
-          {/* <Perf position="top-left" /> */}
           <color attach="background" args={["#121316"]} />
           <OrbitControls />
 
-          {/* Light & Post Processing */}
           <LightingAndEffects
-            ambientLightIntensity={ambientLightIntensity}
-            fogColor={fogColor}
-            fogNear={fogNear}
-            fogFar={fogFar}
-            luminanceThreshold1={luminanceThreshold1}
-            intensity1={intensity1}
-            luminanceThreshold2={luminanceThreshold2}
-            intensity2={intensity2}
+            ambientLightIntensity={sceneConfig.ambientLightIntensity}
+            fogColor={sceneConfig.fogColor}
+            fogNear={sceneConfig.fogNear}
+            fogFar={sceneConfig.fogFar}
+            luminanceThreshold1={sceneConfig.luminanceThreshold1}
+            intensity1={sceneConfig.intensity1}
+            luminanceThreshold2={sceneConfig.luminanceThreshold2}
+            intensity2={sceneConfig.intensity2}
           />
 
-          {/* Parallax effect */}
           <group position={[0, -0.6, 0]}>
             <Parallax startParallax={startParallax}>
-              {/* Model */}
               <NeonModel
                 modelPath={primitivesData[currentModel].path}
                 curveConfigs={primitivesData[currentModel].shaders}
               />
 
-              {/* Backdrop */}
               <Backdrop
                 floor={2}
-                position={[
-                  backDropPositionX,
-                  backDropPositionY,
-                  backDropPositionZ,
-                ]}
-                scale={[backDropScaleX, backDropScaleY, backDropScaleZ]}
+                position={sceneConfig.backDropPosition}
+                scale={sceneConfig.backDropScale}
               >
                 <meshStandardMaterial
-                  color={backdropColor}
+                  color={sceneConfig.backdropColor}
                   envMapIntensity={0.1}
                 />
               </Backdrop>
             </Parallax>
 
-            {/* Ground */}
             <Ground
               mirror={1}
               blur={[400, 100]}
