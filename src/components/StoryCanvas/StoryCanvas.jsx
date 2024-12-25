@@ -44,7 +44,6 @@ const StoryCanvas = ({ startStory, startParallax }) => {
         />
         <Canvas dpr={[1, 1.5]}>
           <color attach="background" args={["#121316"]} />
-          <OrbitControls />
 
           <LightingAndEffects
             ambientLightIntensity={sceneConfig.ambientLightIntensity}

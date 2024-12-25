@@ -1,6 +1,6 @@
 import React from "react";
 import "./Loader.scss";
-import logo from "../../assets/logo.png";
+import logo from "../../assets/logo.webp";
 
 const Loader = ({ progress = 0 }) => {
   return (

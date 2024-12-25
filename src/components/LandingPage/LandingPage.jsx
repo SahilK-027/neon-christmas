@@ -129,7 +129,6 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
 
         <Canvas dpr={[1, 1.5]}>
           <color attach="background" args={["#121316"]} />
-          <OrbitControls />
           <LightingAndEffects
             ambientLightIntensity={sceneConfig.ambientLightIntensity}
             fogColor={sceneConfig.fogColor}
