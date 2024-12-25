@@ -11,6 +11,7 @@ import primitivesData from "../../utils/primitivesData";
 import { useSpring, animated } from "@react-spring/web";
 
 const LandingPage = ({ enterStory, setEnterStory }) => {
+  // const [currentModel, setCurrentModel] = useState("ascensionModel");
   const [currentModel, setCurrentModel] = useState("xMasModel");
   const [shouldDisplay, setShouldDisplay] = useState(true);
   const [IsFullScreen, setIsFullScreen] = useState(false);

@@ -77,7 +77,7 @@ const App = () => {
         <Loader progress={loadingProgress} />
       </animated.div>
       <LandingPage enterStory={enterStory} setEnterStory={setEnterStory} />
-      <StoryCanvas startStory={enterStory} startParallax={enterStory} />
+      {/* <StoryCanvas startStory={enterStory} startParallax={enterStory} /> */}
     </>
   );
 };

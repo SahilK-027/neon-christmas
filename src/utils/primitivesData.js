@@ -73,15 +73,56 @@ const primitivesData = {
     fogColor: "#4e1a0f",
   },
   baptismModel: {
-    path: "/models/monkey.glb",
+    path: "/models/baptism.glb",
     shaders: {
       curve1: {
-        defaultColorA: "red",
-        defaultColorB: "orange",
-        defaultIntensity: 2,
+        defaultColorA: "#6bd3ff",
+        defaultColorB: "#4b7fff",
+        defaultIntensity: 2.0,
+      },
+      curve2: {
+        defaultColorA: "#996bff",
+        defaultColorB: "#fc5d5d",
+        defaultIntensity: 1.4,
+      },
+      curve3: {
+        defaultColorA: "#ffe2a6",
+        defaultColorB: "#fff4b1",
+        defaultIntensity: 3.0,
+      },
+      curve4: {
+        defaultColorA: "#ffd1ed",
+        defaultColorB: "#ffe3ff",
+        defaultIntensity: 1.3,
       },
     },
-    fogColor: "#4b041f",
+    fogColor: "#0f294f",
+  },
+  ascensionModel: {
+    path: "/models/ascension.glb",
+    shaders: {
+      curve1: {
+        defaultColorA: "#ffbfbf",
+        defaultColorB: "#ffce84",
+        defaultIntensity: 2.0,
+      },
+      curve2: {
+        defaultColorA: "#996bff",
+        defaultColorB: "#fc5d5d",
+        defaultIntensity: 1.4,
+      },
+      curve3: {
+        defaultColorA: "#a7ffb4",
+        defaultColorB: "#ccffb0",
+        defaultIntensity: 1.5,
+      },
+      curve4: {
+        defaultColorA: "#5e99ff",
+        defaultColorB: "#4b99ff",
+        defaultIntensity: 2.5,
+      },
+    },
+    fogColor: "#0f294f",
   },
 };
 

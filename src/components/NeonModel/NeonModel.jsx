@@ -41,7 +41,7 @@ const NeonModel = ({ modelPath, curveConfigs }) => {
             float distanceToMouse = distance(worldPosition, uMouseWorld);
           
             // fallOff calculation
-            float falloff = 1.0 - smoothstep(0.0, 0.6, distanceToMouse);
+            float falloff = 1.0 - smoothstep(0.0, 0.7, distanceToMouse);
             falloff = pow(falloff, 2.0); // Smooth quadratic falloff
           
             // Deform model based on mouse contact position
