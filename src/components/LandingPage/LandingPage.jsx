@@ -25,7 +25,7 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
     luminanceThreshold2: 0,
     intensity2: 0.2,
     backDropPosition: [0, -0.5, -4.75],
-    backDropScale: [50, 10, 5],
+    backDropScale: [50, 20, 5],
     backdropColor: "#121316",
   };
 
