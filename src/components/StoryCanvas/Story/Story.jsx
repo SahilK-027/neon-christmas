@@ -150,6 +150,7 @@ const Story = ({
             setCurrentLineIndex(0);
           }, 2000);
         }
+        // TODO: Add the end & restart button
         return;
       }
 
