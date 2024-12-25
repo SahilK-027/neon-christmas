@@ -15,3 +15,14 @@ body {
   font-family: "Josefin Sans", serif;
   overflow: hidden;
 }
+
+a {
+  color: #8c66ff;
+  text-underline-offset: 4px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

@@ -105,7 +105,10 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
         <div className="nav-row">
           <div className="dev">
             <p className="developer">
-              Creative story experiment built with three.js & R3F by SahilK-027
+              Creative story experiment built with three.js & R3F by{" "}
+              <a target="_blank" href="https://github.com/SahilK-027">
+                SahilK-027
+              </a>
             </p>
             <p className="headphone-info">
               Use <i className="fa-solid fa-headphones"></i> for immersive
