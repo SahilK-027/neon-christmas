@@ -13,9 +13,14 @@ const Story = forwardRef(
   ({ start, currentModel, setCurrentModel, setProgressPercentage }, ref) => {
     const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
     const [currentLineIndex, setCurrentLineIndex] = useState(0);
+    let audioTimer;
 
     useImperativeHandle(ref, () => ({
       jumpToChapter: (chapterIndex) => {
+        // Stop any currently playing audio
+        setShouldPlayAudio(false);
+        clearTimeout(audioTimer);
+
         if (chapterIndex < 4) {
           setCurrentStoryIndex(chapterIndex);
           setCurrentLineIndex(0);
@@ -28,7 +33,7 @@ const Story = forwardRef(
           const voiceOver = stories[chapterIndex]?.voiceOver || "";
           if (voiceOver) {
             setCurrentAudio(voiceOver);
-            setTimeout(() => {
+            audioTimer = setTimeout(() => {
               setShouldPlayAudio(true);
             }, 8000);
           } else {
@@ -37,15 +42,13 @@ const Story = forwardRef(
           setShowEndScreen(false);
         } else {
           setCurrentStoryIndex(chapterIndex);
-          setProgressPercentage(chapterIndex * STORY_WEIGHT);
+          setProgressPercentage(100);
           setIsVisible(false);
           setShouldPlayAudio(false);
           setShowStoryName(false);
           setShouldDisplayStoryName(false);
           setShowEndScreen(true);
         }
-
-        console.log(`Jumped to chapter ${chapterIndex}`);
       },
     }));
 
@@ -163,7 +166,7 @@ const Story = forwardRef(
       if (voiceOver && start) {
         setCurrentAudio(voiceOver);
 
-        const audioTimer = setTimeout(() => {
+        audioTimer = setTimeout(() => {
           setShouldPlayAudio(true);
         }, 8000);
 
@@ -200,11 +203,14 @@ const Story = forwardRef(
               }, 2000);
               setCurrentLineIndex(0);
             }, 2000);
-          }
-          // TODO: Add the end & restart button
-          else {
+          } else {
+            clearTimeout(audioTimer);
+            setProgressPercentage(100);
+            setIsVisible(false);
+            setShouldPlayAudio(false);
+            setShowStoryName(false);
+            setShouldDisplayStoryName(false);
             setShowEndScreen(true);
-            console.log(showEndScreen);
           }
           return;
         }
