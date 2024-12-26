@@ -1,13 +1,9 @@
-import React, {
-  useEffect,
-  useState,
-  useMemo,
-  useImperativeHandle,
-} from "react";
+import React, { useEffect, useState, useImperativeHandle } from "react";
 import "./Story.scss";
 import { useTrail, animated, useSpring } from "@react-spring/web";
 import stories from "../../../utils/storyData.js";
 import { forwardRef } from "react";
+import Confetti from "react-confetti";
 
 const Story = forwardRef(
   ({ start, currentModel, setCurrentModel, setProgressPercentage }, ref) => {
@@ -306,6 +302,23 @@ const Story = forwardRef(
                 }}
                 className="story-name-overlay end-screen"
               >
+                <Confetti
+                  width={window.innerWidth}
+                  height={window.innerHeight}
+                  numberOfPieces={500}
+                  gravity={0.27}
+                  recycle={false}
+                  colors={[
+                    "#fe7857",
+                    "#fed757",
+                    "#c1fe57",
+                    "#57fe84",
+                    "#57fcfe",
+                    "#7157fe",
+                    "#ff3ee6",
+                    "#ff0075",
+                  ]}
+                />
                 <h1>🎄 Merry Christmas! 🎄</h1>
                 <p>
                   {" "}

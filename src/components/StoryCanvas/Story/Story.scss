@@ -31,6 +31,7 @@
 
 .end-screen {
     z-index: 4;
+
     p {
         font-size: 20px;
         margin: 20px 0;
@@ -57,7 +58,6 @@
         }
     }
 }
-
 
 @media (max-width: 800px) {
     .story-overlay-text {
