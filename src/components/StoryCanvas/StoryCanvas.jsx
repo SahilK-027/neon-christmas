@@ -1,6 +1,6 @@
 import { Backdrop, OrbitControls } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Story from "./Story/Story";
 import Ground from "../Ground/Ground";
 import Parallax from "../Parallax/Parallax";
@@ -13,6 +13,7 @@ import "./StoryCanvas.scss";
 const StoryCanvas = ({ startStory, startParallax }) => {
   const [currentModel, setCurrentModel] = useState("birthModel");
   const [progressPercentage, setProgressPercentage] = useState(0);
+  const storyRef = useRef();
 
   const sceneConfig = {
     // Scene settings
@@ -33,10 +34,21 @@ const StoryCanvas = ({ startStory, startParallax }) => {
     backdropColor: "#121316",
   };
 
+  const handleChapterSelect = (chapterIndex) => {
+    if (chapterIndex < 4) {
+      setCurrentModel(primitivesData[chapterIndex]?.modelName || "");
+      setProgressPercentage(chapterIndex * 25);
+    }
+    if (storyRef.current) {
+      storyRef.current.jumpToChapter(chapterIndex);
+    }
+  };
+
   return (
     <>
       <div id="story-board">
         <Story
+          ref={storyRef}
           start={startStory}
           currentModel={currentModel}
           setCurrentModel={setCurrentModel}
@@ -86,7 +98,10 @@ const StoryCanvas = ({ startStory, startParallax }) => {
           </group>
         </Canvas>
 
-        <StoryProgressBar progressPercentage={progressPercentage} />
+        <StoryProgressBar
+          progressPercentage={progressPercentage}
+          onChapterSelect={handleChapterSelect}
+        />
       </div>
     </>
   );

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./StoryProgressBar.scss";
 
-const StoryProgressBar = ({ progressPercentage }) => {
+const StoryProgressBar = ({ progressPercentage, onChapterSelect }) => {
   const [currentChapter, setCurrentChapter] = useState(0);
   const [previousProgress, setPreviousProgress] = useState(0);
 
@@ -19,8 +19,14 @@ const StoryProgressBar = ({ progressPercentage }) => {
     // Calculate and update currentChapter based on the valid progress
     setTimeout(() => {
       setCurrentChapter(Math.floor(validProgress / 25));
-    }, 4000);
+    }, 2000);
   }, [progressPercentage, previousProgress]);
+
+  const handleChapterClick = (index) => {
+    if (onChapterSelect) {
+      onChapterSelect(index); // Notify parent about selected chapter
+    }
+  };
 
   return (
     <div className="progress-bar">
@@ -35,6 +41,7 @@ const StoryProgressBar = ({ progressPercentage }) => {
         <div key={index} className="chapter-container">
           <div
             className={`circle ${index <= currentChapter ? "active" : ""}`}
+            onClick={() => handleChapterClick(index)}
           ></div>
           <span
             className={`chapter-label ${
