@@ -19,6 +19,7 @@ const Story = ({
   const [displayedStoryName, setDisplayedStoryName] = useState(
     stories[0]?.storyName || "Untitled"
   );
+  const [showEndScreen, setShowEndScreen] = useState(false);
 
   const currentStory = stories[currentStoryIndex]?.storyArray || [];
   const lineDuration = stories[currentStoryIndex]?.lineDuration || [];
@@ -47,6 +48,16 @@ const Story = ({
     onRest: () => {
       if (!showStoryName) {
         setShouldDisplayStoryName(false);
+      }
+    },
+  });
+
+  const storyEndScreen = useSpring({
+    opacity: showEndScreen ? 1 : 0,
+    config: { tension: 20, friction: 10, duration: 2000 },
+    onRest: () => {
+      if (!storyEndScreen) {
+        setShowEndScreen(false);
       }
     },
   });
@@ -151,6 +162,10 @@ const Story = ({
           }, 2000);
         }
         // TODO: Add the end & restart button
+        else {
+          setShowEndScreen(true);
+          console.log(showEndScreen);
+        }
         return;
       }
 
@@ -180,7 +195,19 @@ const Story = ({
     currentStoryIndex,
     showStoryName,
     currentModel,
+    showEndScreen,
   ]);
+
+  const restartStory = () => {
+    setCurrentStoryIndex(0);
+    setCurrentLineIndex(0);
+    setShowStoryName(true);
+    setShouldDisplayStoryName(true);
+    setShowEndScreen(false);
+    setIsVisible(true);
+    setProgressPercentage(0);
+    setCurrentModel(stories[0]?.modelName || "");
+  };
 
   return (
     <>
@@ -216,6 +243,37 @@ const Story = ({
           )}
           {shouldPlayAudio && (
             <audio src={currentAudio} autoPlay key={currentAudio} />
+          )}
+
+          {showEndScreen ? (
+            <animated.div
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                ...storyEndScreen,
+              }}
+              className="story-name-overlay end-screen"
+            >
+              <h1>🎄 Merry Christmas! 🎄</h1>
+              <p>
+                {" "}
+                Thank you for joining this vibrant journey through the story of
+                Jesus Christ. May your holiday season be filled with peace, joy,
+                and glowing memories! 🌟
+              </p>
+              <div className="buttons">
+                <button onClick={restartStory}>Restart story</button>
+                <button className="transparent-btn">Watch Devlog</button>
+              </div>
+            </animated.div>
+          ) : (
+            <></>
           )}
         </div>
       ) : null}
