@@ -305,8 +305,8 @@ const Story = forwardRef(
                 <Confetti
                   width={window.innerWidth}
                   height={window.innerHeight}
-                  numberOfPieces={500}
-                  gravity={0.27}
+                  numberOfPieces={700}
+                  gravity={0.15}
                   recycle={false}
                   colors={[
                     "#fe7857",
@@ -327,8 +327,13 @@ const Story = forwardRef(
                   joy, and glowing memories! 🌟
                 </p>
                 <div className="buttons">
-                  <button onClick={restartStory}>Restart story</button>
-                  <button className="transparent-btn">Watch Devlog</button>
+                  <button onClick={restartStory}>
+                    {" "}
+                    <i class="fa-solid fa-repeat"></i> {" "}Replay story
+                  </button>
+                  {/**
+                   * <button className="transparent-btn">Watch Devlog</button>
+                   */}
                 </div>
               </animated.div>
             ) : (
