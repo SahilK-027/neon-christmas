@@ -137,7 +137,7 @@
                 font-size: 18px;
                 padding: 28px 18px;
                 border: none;
-                border-radius: 100px;
+                border-radius: 100%;
                 cursor: pointer;
                 transition: all 0.3s ease;
                 background: #ffffff38;
@@ -170,16 +170,30 @@
 
         .footer-row {
             padding: 35px;
+            padding-bottom: 80px;
 
             h1 {
-                font-size: 40px;
+                font-size: 35px;
             }
 
             .enter-button {
-                gap: 20px;
+                gap: 10px;
+
+                button {
+                    font-size: 16px;
+                    padding: 4px;
+                    width: 60px;
+                    height: 60px;
+
+                    &:hover {
+                        background: #ffffff;
+                        color: #121316;
+                        box-shadow: 0 0 10px #fff;
+                    }
+                }
 
                 h2 {
-                    font-size: 25px;
+                    font-size: 20px;
                 }
             }
         }

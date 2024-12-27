@@ -73,3 +73,13 @@
     font-weight: 600;
     font-size: 1.1rem;
 }
+
+@media (max-width: 800px) {
+    .chapter-label {
+        font-size: 0.8rem;
+    }
+
+    .chapter-label.active {
+        font-size: 0.9rem;
+    }
+}
