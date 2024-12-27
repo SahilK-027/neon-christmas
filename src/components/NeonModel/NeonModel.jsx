@@ -1,9 +1,12 @@
 import { useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useMemo, useRef, useEffect } from "react";
+import { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 
 const NeonModel = ({ modelPath, curveConfigs }) => {
+  // State to track model to ensure only one model is loaded at a time
+  const [model, setModel] = useState(null);
+
   // Create static shader configurations based on curve configs
   const shaderConfigs = useMemo(() => {
     const configs = {};
@@ -91,13 +94,51 @@ const NeonModel = ({ modelPath, curveConfigs }) => {
     return generatedShaders;
   }, [shaderConfigs]);
 
-  const { scene } = useGLTF(modelPath);
+  // Load the model
+  const { scene } = useGLTF(modelPath, true);
   const { camera, gl } = useThree();
   const mouse = useRef(new THREE.Vector3(0, 0, 0));
   const smoothMouse = useRef(new THREE.Vector3(0, 0, 0));
   const rayCaster = new THREE.Raycaster();
   const pointer = new THREE.Vector2();
 
+  // Dispose old model when model changes
+  useEffect(() => {
+    if (model) {
+      // Dispose old model resources before loading a new one
+      model.traverse((child) => {
+        if (child.isMesh) {
+          child.geometry.dispose();
+          if (child.material.isMaterial) {
+            child.material.dispose();
+          } else {
+            // If it's a multi-material mesh
+            child.material.forEach((material) => material.dispose());
+          }
+        }
+      });
+    }
+
+    setModel(scene); // Update model to new scene
+
+    return () => {
+      // Ensure the old model is cleaned up when the component unmounts
+      if (model) {
+        model.traverse((child) => {
+          if (child.isMesh) {
+            child.geometry.dispose();
+            if (child.material.isMaterial) {
+              child.material.dispose();
+            } else {
+              child.material.forEach((material) => material.dispose());
+            }
+          }
+        });
+      }
+    };
+  }, [modelPath]);
+
+  // Mouse move effect
   useEffect(() => {
     const handleMouseMove = (event) => {
       pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
@@ -126,19 +167,22 @@ const NeonModel = ({ modelPath, curveConfigs }) => {
     });
   });
 
+  // Assign shaders to meshes
   useEffect(() => {
-    scene.traverse((child) => {
-      if (child.isMesh) {
-        const matchingShader = Object.entries(shaders).find(([key]) =>
-          child.name.toLowerCase().includes(key.toLowerCase())
-        );
+    if (scene) {
+      scene.traverse((child) => {
+        if (child.isMesh) {
+          const matchingShader = Object.entries(shaders).find(([key]) =>
+            child.name.toLowerCase().includes(key.toLowerCase())
+          );
 
-        if (matchingShader) {
-          child.material = matchingShader[1];
-          child.material.needsUpdate = true;
+          if (matchingShader) {
+            child.material = matchingShader[1];
+            child.material.needsUpdate = true;
+          }
         }
-      }
-    });
+      });
+    }
   }, [scene, shaders]);
 
   return <primitive object={scene} scale={1} position={[0, 0, 0]} />;
