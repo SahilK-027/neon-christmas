@@ -1,4 +1,4 @@
-import { Backdrop, OrbitControls } from "@react-three/drei";
+import { Backdrop } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { Suspense, useRef, useState, useMemo, useCallback } from "react";
 import { useEffect } from "react";
@@ -130,7 +130,7 @@ const StoryCanvas = ({ startStory, startParallax }) => {
           alpha: true,
         }}
       >
-        <Perf position="top-left" />
+        {/* <Perf position="top-left" /> */}
         <color attach="background" args={["#121316"]} />
         <Suspense fallback={null}>
           <LightingAndEffects

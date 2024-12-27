@@ -120,7 +120,7 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
             alpha: true,
           }}
         >
-          <Perf position="top-left" />
+          {/* <Perf position="top-left" /> */}
           <color attach="background" args={["#121316"]} />
           <LightingAndEffects
             ambientLightIntensity={sceneConfig.ambientLightIntensity}
