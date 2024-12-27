@@ -85,6 +85,15 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
                 SahilK-027
               </a>
             </p>
+            <div className="credits">
+              Music by{" "}
+              <a
+                target="_blank"
+                href="https://pixabay.com/users/clavier-music-16027823/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=271857"
+              >
+                Clavier-Music
+              </a>
+            </div>
             <p className="headphone-info">
               Use <i className="fa-solid fa-headphones"></i> for immersive
               experience
