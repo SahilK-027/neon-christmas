@@ -1,4 +1,5 @@
 # 🎄 Neon Christmas
+<img width="1440" alt="Screenshot 2024-12-27 at 1 17 37 PM" src="https://github.com/user-attachments/assets/fde84d79-0554-47a0-85b9-3f00dd9b7167" />
 
 Celebrate the life of Jesus Christ with **Neon Christmas**, a vibrant 3D web experience built with **React Three Fiber (R3F)**. This project brings to life, the important moments through glowing neon-themed scenes, immersive storytelling, and a creative visual journey.
 
