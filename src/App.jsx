@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSpring, animated } from "@react-spring/web";
 import * as THREE from "three";
 import Loader from "./components/Loader/Loader";
@@ -11,6 +11,30 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [enterStory, setEnterStory] = useState(false);
+  const bgAudioRef = useRef(new Audio("/audio/bg2.mp3"));
+
+  useEffect(() => {
+    bgAudioRef.current.loop = true;
+    bgAudioRef.current.volume = 0.1;
+
+    return () => {
+      bgAudioRef.current.pause();
+      bgAudioRef.current.currentTime = 0;
+    };
+  }, []);
+
+  const playBgMusic = () => {
+    const audio = bgAudioRef.current;
+    audio.play().catch((error) => {
+      console.error("Audio playback failed:", error);
+    });
+  };
+
+  useEffect(() => {
+    if (enterStory) {
+      playBgMusic();
+    }
+  }, [enterStory]);
 
   const loaderSpring = useSpring({
     transform: isLoading ? "translateY(0%)" : "translateY(-100%)",

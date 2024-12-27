@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import "./LandingPage.scss";
 import { Canvas } from "@react-three/fiber";
-import { Backdrop, OrbitControls } from "@react-three/drei";
+import { Backdrop } from "@react-three/drei";
 import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import Parallax from "../Parallax/Parallax";
 import NeonModel from "../NeonModel/NeonModel";
@@ -13,7 +13,6 @@ import { Perf } from "r3f-perf";
 const LandingPage = ({ enterStory, setEnterStory }) => {
   const [currentModel, setCurrentModel] = useState("xMasModel");
   const [IsFullScreen, setIsFullScreen] = useState(false);
-  const audioRef = useRef(new Audio("/audio/bg.mp3"));
 
   const sceneConfig = {
     fogColor: primitivesData[currentModel].fogColor,
@@ -28,17 +27,6 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
     backDropScale: [50, 20, 5],
     backdropColor: "#121316",
   };
-
-  useEffect(() => {
-    audioRef.current.loop = true;
-    audioRef.current.volume = 0.05;
-
-    return () => {
-      // Clean up audio on component unmount
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    };
-  }, []);
 
   const landingSpring = useSpring({
     opacity: enterStory ? 0 : 1,
@@ -68,15 +56,7 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
     }
   };
 
-  const playBgMusic = () => {
-    const audio = audioRef.current;
-    audio.play().catch((error) => {
-      console.error("Audio playback failed:", error);
-    });
-  };
-
   const enterToStory = () => {
-    playBgMusic();
     enterFullScreen();
     setEnterStory(true);
   };
