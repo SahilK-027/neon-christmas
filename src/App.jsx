@@ -11,7 +11,7 @@ const App = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingProgress, setLoadingProgress] = useState(0);
   const [enterStory, setEnterStory] = useState(false);
-  const bgAudioRef = useRef(new Audio("/audio/bg2.mp3"));
+  const bgAudioRef = useRef(new Audio("/audio/bg.mp3"));
 
   useEffect(() => {
     bgAudioRef.current.loop = true;
