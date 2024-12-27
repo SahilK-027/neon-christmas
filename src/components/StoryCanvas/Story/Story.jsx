@@ -97,7 +97,7 @@ const Story = forwardRef(
             setAudioState({ currentAudio: voiceOver, shouldPlayAudio: false });
             setTimeout(() => {
               setAudioState((prev) => ({ ...prev, shouldPlayAudio: true }));
-            }, 8000);
+            }, 5000);
           }
         } else {
           setStoryState((prev) => ({
@@ -266,7 +266,7 @@ const Story = forwardRef(
 
       const audioTimer = setTimeout(() => {
         setAudioState((prev) => ({ ...prev, shouldPlayAudio: true }));
-      }, 6800);
+      }, 5000);
 
       return () => {
         clearTimeout(audioTimer);
