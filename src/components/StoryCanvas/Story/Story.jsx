@@ -209,7 +209,7 @@ const Story = forwardRef(
           }));
           const modelTimer = setTimeout(() => {
             setCurrentModel(stories[nextStoryIndex]?.modelName || "");
-          }, 2000);
+          }, 1650);
           timers.push(modelTimer);
         } else {
           setStoryState((prev) => ({
