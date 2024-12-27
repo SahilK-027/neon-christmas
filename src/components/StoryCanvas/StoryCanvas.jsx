@@ -130,7 +130,7 @@ const StoryCanvas = ({ startStory, startParallax }) => {
           alpha: true,
         }}
       >
-        {/* <Perf position="top-left" /> */}
+        <Perf position="top-left" />
         <color attach="background" args={["#121316"]} />
         <Suspense fallback={null}>
           <LightingAndEffects

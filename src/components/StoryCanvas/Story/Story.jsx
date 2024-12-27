@@ -199,19 +199,18 @@ const Story = forwardRef(
         if (storyState.currentStoryIndex + 1 < stories.length) {
           setStoryState((prev) => ({ ...prev, isVisible: false }));
 
-          const nextStoryTimer = setTimeout(() => {
-            const nextStoryIndex = storyState.currentStoryIndex + 1;
-            setStoryState((prev) => ({
-              ...prev,
-              currentStoryIndex: nextStoryIndex,
-              currentLineIndex: 0,
-              showStoryName: true,
-              shouldDisplayStoryName: true,
-            }));
-
+          const nextStoryIndex = storyState.currentStoryIndex + 1;
+          setStoryState((prev) => ({
+            ...prev,
+            currentStoryIndex: nextStoryIndex,
+            currentLineIndex: 0,
+            showStoryName: true,
+            shouldDisplayStoryName: true,
+          }));
+          const modelTimer = setTimeout(() => {
             setCurrentModel(stories[nextStoryIndex]?.modelName || "");
           }, 2000);
-          timers.push(nextStoryTimer);
+          timers.push(modelTimer);
         } else {
           setStoryState((prev) => ({
             ...prev,
