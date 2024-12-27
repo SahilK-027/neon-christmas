@@ -20,27 +20,22 @@ const App = () => {
 
   useEffect(() => {
     const loadingManager = new THREE.LoadingManager(
-      // Loaded
       () => {
         setLoadingProgress(100);
         setTimeout(() => {
           setIsLoading(false);
         }, 800);
       },
-
-      // Progress
       (itemUrl, itemsLoaded, totalItems) => {
         const progressRatio = (itemsLoaded / totalItems) * 100;
         setLoadingProgress(progressRatio);
       }
     );
 
-    // Preload all images
     const textureLoader = new THREE.TextureLoader(loadingManager);
     textureLoader.load("/textures/color.jpg", () => {});
     textureLoader.load("/textures/normal.jpg", () => {});
 
-    // Preload all models
     const dracoLoader = new DRACOLoader(loadingManager);
     dracoLoader.setDecoderPath("/draco/");
     const gltfLoader = new GLTFLoader(loadingManager);
@@ -51,7 +46,6 @@ const App = () => {
     gltfLoader.load("/models/crucifixion.glb", () => {});
     gltfLoader.load("/models/ascension.glb", () => {});
 
-    // Preload all audio
     const audioLoader = new THREE.AudioLoader(loadingManager);
     audioLoader.load("/audio/bg.mp3", () => {});
     audioLoader.load("/audio/ascension.mp3", () => {});
@@ -79,8 +73,16 @@ const App = () => {
       >
         <Loader progress={loadingProgress} />
       </animated.div>
-      <LandingPage enterStory={enterStory} setEnterStory={setEnterStory} />
-      <StoryCanvas startStory={enterStory} startParallax={enterStory} />
+
+      {/* Conditionally render LandingPage only when enterStory is false */}
+      {!enterStory && (
+        <LandingPage enterStory={enterStory} setEnterStory={setEnterStory} />
+      )}
+
+      {/* Conditionally render StoryCanvas only after entering the story */}
+      {enterStory && (
+        <StoryCanvas startStory={enterStory} startParallax={enterStory} />
+      )}
     </>
   );
 };

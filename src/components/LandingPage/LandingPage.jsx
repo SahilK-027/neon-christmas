@@ -5,13 +5,13 @@ import { Backdrop, OrbitControls } from "@react-three/drei";
 import LightingAndEffects from "../LightingAndEffects/LightingAndEffects";
 import Parallax from "../Parallax/Parallax";
 import NeonModel from "../NeonModel/NeonModel";
-import Ground from "../Ground/Ground";
+import { MemoizedGround as Ground } from "../Ground/Ground";
 import primitivesData from "../../utils/primitivesData";
 import { useSpring, animated } from "@react-spring/web";
+import { Perf } from "r3f-perf";
 
 const LandingPage = ({ enterStory, setEnterStory }) => {
   const [currentModel, setCurrentModel] = useState("xMasModel");
-  const [shouldDisplay, setShouldDisplay] = useState(true);
   const [IsFullScreen, setIsFullScreen] = useState(false);
   const audioRef = useRef(new Audio("/audio/bg.mp3"));
 
@@ -34,6 +34,7 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
     audioRef.current.volume = 0.05;
 
     return () => {
+      // Clean up audio on component unmount
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
     };
@@ -42,11 +43,6 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
   const landingSpring = useSpring({
     opacity: enterStory ? 0 : 1,
     config: { tension: 100, friction: 100, duration: 800 },
-    onRest: () => {
-      if (enterStory) {
-        setShouldDisplay(false);
-      }
-    },
   });
 
   const enterFullScreen = () => {
@@ -97,7 +93,6 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
         justifyContent: "center",
         background: "#000",
         zIndex: 4,
-        display: shouldDisplay ? "flex" : "none",
         ...landingSpring,
       }}
     >
@@ -127,7 +122,16 @@ const LandingPage = ({ enterStory, setEnterStory }) => {
           </div>
         </div>
 
-        <Canvas dpr={[1, 1.5]}>
+        <Canvas
+          dpr={[1, Math.min(window.devicePixelRatio, 2)]}
+          performance={{ min: 0.8 }}
+          gl={{
+            powerPreference: "high-performance",
+            antialias: window.devicePixelRatio <= 1.5,
+            alpha: true,
+          }}
+        >
+          <Perf position="top-left" />
           <color attach="background" args={["#121316"]} />
           <LightingAndEffects
             ambientLightIntensity={sceneConfig.ambientLightIntensity}

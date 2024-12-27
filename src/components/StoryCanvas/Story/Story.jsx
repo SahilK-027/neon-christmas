@@ -1,4 +1,10 @@
-import React, { useEffect, useState, useImperativeHandle } from "react";
+import React, {
+  useEffect,
+  useState,
+  useImperativeHandle,
+  useCallback,
+  useMemo,
+} from "react";
 import "./Story.scss";
 import { useTrail, animated, useSpring } from "@react-spring/web";
 import stories from "../../../utils/storyData.js";
@@ -7,341 +13,369 @@ import Confetti from "react-confetti";
 
 const Story = forwardRef(
   ({ start, currentModel, setCurrentModel, setProgressPercentage }, ref) => {
-    const [currentStoryIndex, setCurrentStoryIndex] = useState(0);
-    const [currentLineIndex, setCurrentLineIndex] = useState(0);
-    let audioTimer;
+    // Core state management
+    const [storyState, setStoryState] = useState({
+      currentStoryIndex: 0,
+      currentLineIndex: 0,
+      isVisible: true,
+      showStoryName: true,
+      shouldDisplayStoryName: true,
+      showEndScreen: false,
+    });
 
-    useImperativeHandle(ref, () => ({
-      jumpToChapter: (chapterIndex) => {
-        // Stop any currently playing audio
-        setShouldPlayAudio(false);
-        clearTimeout(audioTimer);
+    // Audio state
+    const [audioState, setAudioState] = useState({
+      currentAudio: "",
+      shouldPlayAudio: false,
+    });
 
-        if (chapterIndex < 4) {
-          setCurrentStoryIndex(chapterIndex);
-          setCurrentLineIndex(0);
-          setProgressPercentage(chapterIndex * STORY_WEIGHT);
-          setCurrentModel(stories[chapterIndex]?.modelName || "");
-          setIsVisible(true);
-          setShowStoryName(true);
-          setShouldDisplayStoryName(true);
-
-          const voiceOver = stories[chapterIndex]?.voiceOver || "";
-          if (voiceOver) {
-            setCurrentAudio(voiceOver);
-            audioTimer = setTimeout(() => {
-              setShouldPlayAudio(true);
-            }, 8000);
-          } else {
-            setShouldPlayAudio(false);
-          }
-          setShowEndScreen(false);
-        } else {
-          setCurrentStoryIndex(chapterIndex);
-          setProgressPercentage(100);
-          setIsVisible(false);
-          setShouldPlayAudio(false);
-          setShowStoryName(false);
-          setShouldDisplayStoryName(false);
-          setShowEndScreen(true);
-        }
-      },
-    }));
-
-    const [isVisible, setIsVisible] = useState(true);
-    const [showStoryName, setShowStoryName] = useState(true);
-    const [shouldDisplayStoryName, setShouldDisplayStoryName] = useState(true);
-    const [currentAudio, setCurrentAudio] = useState("");
-    const [shouldPlayAudio, setShouldPlayAudio] = useState(false);
-    const [displayedStoryName, setDisplayedStoryName] = useState(
-      stories[0]?.storyName || "Untitled"
+    // Memoized story data
+    const currentStoryData = useMemo(
+      () => ({
+        story: stories[storyState.currentStoryIndex]?.storyArray || [],
+        lineDuration: stories[storyState.currentStoryIndex]?.lineDuration || [],
+        storyName:
+          stories[storyState.currentStoryIndex]?.storyName || "Untitled",
+        voiceOver: stories[storyState.currentStoryIndex]?.voiceOver || "",
+        words: (
+          stories[storyState.currentStoryIndex]?.storyArray[
+            storyState.currentLineIndex
+          ] || ""
+        ).split(" "),
+      }),
+      [storyState.currentStoryIndex, storyState.currentLineIndex]
     );
-    const [showEndScreen, setShowEndScreen] = useState(false);
 
-    const currentStory = stories[currentStoryIndex]?.storyArray || [];
-    const lineDuration = stories[currentStoryIndex]?.lineDuration || [];
-    const storyName = stories[currentStoryIndex]?.storyName || "Untitled";
-    const voiceOver = stories[currentStoryIndex]?.voiceOver || "";
+    const STORY_WEIGHT = 25;
 
-    useEffect(() => {
-      setDisplayedStoryName(
-        stories[currentStoryIndex]?.storyName || "Untitled"
-      );
-    }, [currentStoryIndex]);
-
-    const words = currentStory[currentLineIndex]?.split(" ") || [];
-
-    const STORY_WEIGHT = 25; // Each story contributes exactly 25% to total progress
-
-    // Trail animation for words
-    const trail = useTrail(words.length, {
-      opacity: isVisible ? 1 : 0,
-      transform: isVisible ? "translateY(0px)" : "translateY(20px)",
+    // Memoized animations
+    const trail = useTrail(currentStoryData.words.length, {
+      opacity: storyState.isVisible ? 1 : 0,
+      transform: storyState.isVisible ? "translateY(0px)" : "translateY(20px)",
       config: { tension: 200, friction: 26 },
       delay: 0,
     });
 
     const storyNameAnimation = useSpring({
-      opacity: showStoryName ? 1 : 0,
-      config: { tension: 20, friction: 10, duration: 2000 },
+      opacity: storyState.showStoryName ? 1 : 0,
+      config: { tension: 200, friction: 10, duration: 1000 },
       onRest: () => {
-        if (!showStoryName) {
-          setShouldDisplayStoryName(false);
+        if (!storyState.showStoryName) {
+          setStoryState((prev) => ({ ...prev, shouldDisplayStoryName: false }));
         }
       },
     });
 
     const storyEndScreen = useSpring({
-      opacity: showEndScreen ? 1 : 0,
-      config: { tension: 20, friction: 10, duration: 2000 },
-      onRest: () => {
-        if (!storyEndScreen) {
-          setShowEndScreen(false);
-        }
-      },
+      opacity: storyState.showEndScreen ? 1 : 0,
+      config: { tension: 200, friction: 10, duration: 1000 },
     });
 
-    useEffect(() => {
-      let intervalId;
-      if (start && !shouldDisplayStoryName) {
-        // Calculate base progress from completed stories
-        const storyStartProgress = currentStoryIndex * STORY_WEIGHT;
+    // Handlers
+    const jumpToChapter = useCallback(
+      (chapterIndex) => {
+        if (chapterIndex >= stories.length) return;
 
-        // For the last line of the story, ensure we hit exactly the story boundary
-        const isLastLine = currentLineIndex === currentStory.length - 1;
+        setAudioState((prev) => ({ ...prev, shouldPlayAudio: false }));
 
-        // Calculate progress within current story (0 to STORY_WEIGHT)
-        let lineStartProgress, lineEndProgress;
+        if (chapterIndex < 4) {
+          setStoryState((prev) => ({
+            ...prev,
+            currentStoryIndex: chapterIndex,
+            currentLineIndex: 0,
+            isVisible: true,
+            showStoryName: true,
+            shouldDisplayStoryName: true,
+            showEndScreen: false,
+          }));
 
-        if (isLastLine) {
-          // For the last line, end exactly at the story boundary
-          lineStartProgress =
-            storyStartProgress +
-            (currentLineIndex / currentStory.length) * STORY_WEIGHT;
-          lineEndProgress = (currentStoryIndex + 1) * STORY_WEIGHT;
-        } else {
-          lineStartProgress =
-            storyStartProgress +
-            (currentLineIndex / currentStory.length) * STORY_WEIGHT;
-          lineEndProgress =
-            storyStartProgress +
-            ((currentLineIndex + 1) / currentStory.length) * STORY_WEIGHT;
-        }
+          setProgressPercentage(chapterIndex * STORY_WEIGHT);
+          setCurrentModel(stories[chapterIndex]?.modelName || "");
 
-        const lineStartTime = Date.now();
-        const lineEndTime = lineStartTime + lineDuration[currentLineIndex];
-        setProgressPercentage(lineStartProgress);
-
-        intervalId = setInterval(() => {
-          const now = Date.now();
-          if (now >= lineEndTime) {
-            setProgressPercentage(lineEndProgress);
-            clearInterval(intervalId);
-          } else {
-            const elapsedTime = now - lineStartTime;
-            const lineProgress =
-              lineStartProgress +
-              (elapsedTime / lineDuration[currentLineIndex]) *
-                (lineEndProgress - lineStartProgress);
-            setProgressPercentage(Math.min(lineProgress, 100));
+          const voiceOver = stories[chapterIndex]?.voiceOver;
+          if (voiceOver) {
+            setAudioState({ currentAudio: voiceOver, shouldPlayAudio: false });
+            setTimeout(() => {
+              setAudioState((prev) => ({ ...prev, shouldPlayAudio: true }));
+            }, 8000);
           }
-        }, 100);
-      }
+        } else {
+          setStoryState((prev) => ({
+            ...prev,
+            currentStoryIndex: chapterIndex,
+            isVisible: false,
+            showStoryName: false,
+            shouldDisplayStoryName: false,
+            showEndScreen: true,
+          }));
+          setProgressPercentage(100);
+          setAudioState({ currentAudio: "", shouldPlayAudio: false });
+        }
+      },
+      [setCurrentModel, setProgressPercentage]
+    );
+
+    // Expose methods to parent
+    useImperativeHandle(
+      ref,
+      () => ({
+        jumpToChapter,
+      }),
+      [jumpToChapter]
+    );
+
+    // Progress calculation and update
+    useEffect(() => {
+      if (!start || storyState.shouldDisplayStoryName) return;
+
+      const calculateProgress = () => {
+        const storyStartProgress = storyState.currentStoryIndex * STORY_WEIGHT;
+        const isLastLine =
+          storyState.currentLineIndex === currentStoryData.story.length - 1;
+
+        const lineStartProgress =
+          storyStartProgress +
+          (storyState.currentLineIndex / currentStoryData.story.length) *
+            STORY_WEIGHT;
+        const lineEndProgress = isLastLine
+          ? (storyState.currentStoryIndex + 1) * STORY_WEIGHT
+          : storyStartProgress +
+            ((storyState.currentLineIndex + 1) /
+              currentStoryData.story.length) *
+              STORY_WEIGHT;
+
+        return { lineStartProgress, lineEndProgress };
+      };
+
+      const { lineStartProgress, lineEndProgress } = calculateProgress();
+      const lineStartTime = Date.now();
+      const lineEndTime =
+        lineStartTime +
+        currentStoryData.lineDuration[storyState.currentLineIndex];
+      setProgressPercentage(lineStartProgress);
+
+      const intervalId = setInterval(() => {
+        const now = Date.now();
+        if (now >= lineEndTime) {
+          setProgressPercentage(lineEndProgress);
+          clearInterval(intervalId);
+        } else {
+          const elapsedTime = now - lineStartTime;
+          const lineProgress =
+            lineStartProgress +
+            (elapsedTime /
+              currentStoryData.lineDuration[storyState.currentLineIndex]) *
+              (lineEndProgress - lineStartProgress);
+          setProgressPercentage(Math.min(lineProgress, 100));
+        }
+      }, 100);
+
       return () => clearInterval(intervalId);
     }, [
-      currentLineIndex,
-      currentStoryIndex,
-      lineDuration,
       start,
+      storyState.currentLineIndex,
+      storyState.currentStoryIndex,
+      storyState.shouldDisplayStoryName,
+      currentStoryData.lineDuration,
+      currentStoryData.story.length,
       setProgressPercentage,
-      shouldDisplayStoryName,
-      currentStory.length,
     ]);
 
+    // Story progression logic
     useEffect(() => {
-      if (voiceOver && start) {
-        setCurrentAudio(voiceOver);
+      if (!start) return;
 
-        audioTimer = setTimeout(() => {
-          setShouldPlayAudio(true);
-        }, 8000);
+      const timers = [];
 
-        return () => {
-          clearTimeout(audioTimer);
-          setShouldPlayAudio(false);
-        };
+      if (storyState.showStoryName) {
+        const storyNameTimer = setTimeout(() => {
+          setStoryState((prev) => ({ ...prev, showStoryName: false }));
+        }, 2000);
+        timers.push(storyNameTimer);
+        return;
       }
-    }, [voiceOver, start]);
 
-    useEffect(() => {
-      if (start) {
-        if (showStoryName) {
-          setShouldDisplayStoryName(true);
+      if (storyState.currentLineIndex >= currentStoryData.story.length) {
+        if (storyState.currentStoryIndex + 1 < stories.length) {
+          setStoryState((prev) => ({ ...prev, isVisible: false }));
 
-          const storyNameTimer = setTimeout(() => {
-            setShowStoryName(false);
-          }, 4000);
+          const nextStoryTimer = setTimeout(() => {
+            const nextStoryIndex = storyState.currentStoryIndex + 1;
+            setStoryState((prev) => ({
+              ...prev,
+              currentStoryIndex: nextStoryIndex,
+              currentLineIndex: 0,
+              showStoryName: true,
+              shouldDisplayStoryName: true,
+            }));
 
-          return () => clearTimeout(storyNameTimer);
+            setCurrentModel(stories[nextStoryIndex]?.modelName || "");
+          }, 2000);
+          timers.push(nextStoryTimer);
+        } else {
+          setStoryState((prev) => ({
+            ...prev,
+            isVisible: false,
+            showStoryName: false,
+            shouldDisplayStoryName: false,
+            showEndScreen: true,
+          }));
+          setProgressPercentage(100);
+          setAudioState({ currentAudio: "", shouldPlayAudio: false });
         }
-
-        if (currentLineIndex >= currentStory.length) {
-          if (currentStoryIndex + 1 < stories.length) {
-            setIsVisible(false);
-
-            setTimeout(() => {
-              setShowStoryName(true);
-              setShouldDisplayStoryName(true);
-              const nextStoryIndex = currentStoryIndex + 1;
-              setCurrentStoryIndex(nextStoryIndex);
-              setTimeout(() => {
-                setCurrentModel(stories[nextStoryIndex]?.modelName || "");
-              }, 2000);
-              setCurrentLineIndex(0);
-            }, 2000);
-          } else {
-            clearTimeout(audioTimer);
-            setProgressPercentage(100);
-            setIsVisible(false);
-            setShouldPlayAudio(false);
-            setShowStoryName(false);
-            setShouldDisplayStoryName(false);
-            setShowEndScreen(true);
-          }
-          return;
-        }
-
-        const showTimer = setTimeout(() => {
-          setIsVisible(true);
-        }, 500);
-
-        const hideTimer = setTimeout(() => {
-          setIsVisible(false);
-        }, lineDuration[currentLineIndex]);
-
-        const nextLineTimer = setTimeout(() => {
-          setCurrentLineIndex((prev) => prev + 1);
-        }, lineDuration[currentLineIndex] + 1800);
-
-        return () => {
-          clearTimeout(showTimer);
-          clearTimeout(hideTimer);
-          clearTimeout(nextLineTimer);
-        };
+        return;
       }
+
+      const showTimer = setTimeout(() => {
+        setStoryState((prev) => ({ ...prev, isVisible: true }));
+      }, 500);
+
+      const hideTimer = setTimeout(() => {
+        setStoryState((prev) => ({ ...prev, isVisible: false }));
+      }, currentStoryData.lineDuration[storyState.currentLineIndex]);
+
+      const nextLineTimer = setTimeout(() => {
+        setStoryState((prev) => ({
+          ...prev,
+          currentLineIndex: prev.currentLineIndex + 1,
+        }));
+      }, currentStoryData.lineDuration[storyState.currentLineIndex] + 1800);
+
+      timers.push(showTimer, hideTimer, nextLineTimer);
+
+      return () => timers.forEach((timer) => clearTimeout(timer));
     }, [
       start,
-      currentLineIndex,
-      currentStory,
-      lineDuration,
-      currentStoryIndex,
-      showStoryName,
-      currentModel,
-      showEndScreen,
+      storyState.currentLineIndex,
+      storyState.currentStoryIndex,
+      storyState.showStoryName,
+      currentStoryData.lineDuration,
+      currentStoryData.story.length,
+      setCurrentModel,
+      setProgressPercentage,
     ]);
 
-    const restartStory = () => {
-      setCurrentStoryIndex(0);
-      setCurrentLineIndex(0);
-      setShowStoryName(true);
-      setShouldDisplayStoryName(true);
-      setShowEndScreen(false);
-      setIsVisible(true);
+    // Voice-over effect
+    useEffect(() => {
+      if (!currentStoryData.voiceOver || !start) return;
+
+      setAudioState((prev) => ({
+        ...prev,
+        currentAudio: currentStoryData.voiceOver,
+      }));
+
+      const audioTimer = setTimeout(() => {
+        setAudioState((prev) => ({ ...prev, shouldPlayAudio: true }));
+      }, 6800);
+
+      return () => {
+        clearTimeout(audioTimer);
+        setAudioState((prev) => ({ ...prev, shouldPlayAudio: false }));
+      };
+    }, [currentStoryData.voiceOver, start]);
+
+    const restartStory = useCallback(() => {
+      setStoryState({
+        currentStoryIndex: 0,
+        currentLineIndex: 0,
+        isVisible: true,
+        showStoryName: true,
+        shouldDisplayStoryName: true,
+        showEndScreen: false,
+      });
       setProgressPercentage(0);
       setCurrentModel(stories[0]?.modelName || "");
-    };
+    }, [setCurrentModel, setProgressPercentage]);
 
-    return (
-      <>
-        {start ? (
-          <div className="story-container">
-            {shouldDisplayStoryName ? (
-              <animated.div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  ...storyNameAnimation,
-                }}
-                className="story-name-overlay"
-              >
-                <h1>{displayedStoryName}</h1>
-              </animated.div>
-            ) : (
-              <div className="story-overlay-text">
-                <div className="line-wrapper">
-                  {trail.map((style, idx) => (
-                    <animated.span key={idx} style={style}>
-                      {words[idx] + " "}
-                    </animated.span>
-                  ))}
-                </div>
-              </div>
-            )}
-            {shouldPlayAudio && (
-              <audio src={currentAudio} autoPlay key={currentAudio} />
-            )}
+    if (!start) return null;
 
-            {showEndScreen ? (
-              <animated.div
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  ...storyEndScreen,
-                }}
-                className="story-name-overlay end-screen"
-              >
-                <Confetti
-                  width={window.innerWidth}
-                  height={window.innerHeight}
-                  numberOfPieces={700}
-                  gravity={0.15}
-                  recycle={false}
-                  colors={[
-                    "#fe7857",
-                    "#fed757",
-                    "#c1fe57",
-                    "#57fe84",
-                    "#57fcfe",
-                    "#7157fe",
-                    "#ff3ee6",
-                    "#ff0075",
-                  ]}
-                />
-                <h1>🎄 Merry Christmas! 🎄</h1>
-                <p>
-                  {" "}
-                  Thank you for joining this vibrant journey through the story
-                  of Jesus Christ. May your holiday season be filled with peace,
-                  joy, and glowing memories! 🌟
-                </p>
-                <div className="buttons">
-                  <button onClick={restartStory}>
-                    {" "}
-                    <i class="fa-solid fa-repeat"></i> {" "}Replay story
-                  </button>
-                  {/**
-                   * <button className="transparent-btn">Watch Devlog</button>
-                   */}
-                </div>
-              </animated.div>
-            ) : (
-              <></>
-            )}
+    return start ? (
+      <div className="story-container">
+        {storyState.shouldDisplayStoryName ? (
+          <animated.div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ...storyNameAnimation,
+            }}
+            className="story-name-overlay"
+          >
+            <h1>{currentStoryData.storyName}</h1>
+          </animated.div>
+        ) : (
+          <div className="story-overlay-text">
+            <div className="line-wrapper">
+              {trail.map((style, idx) => (
+                <animated.span key={idx} style={style}>
+                  {currentStoryData.words[idx] + " "}
+                </animated.span>
+              ))}
+            </div>
           </div>
-        ) : null}
-      </>
+        )}
+
+        {audioState.shouldPlayAudio && (
+          <audio
+            src={audioState.currentAudio}
+            autoPlay
+            key={audioState.currentAudio}
+          />
+        )}
+
+        {storyState.showEndScreen && (
+          <animated.div
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              ...storyEndScreen,
+            }}
+            className="story-name-overlay end-screen"
+          >
+            <Confetti
+              width={window.innerWidth}
+              height={window.innerHeight}
+              numberOfPieces={300}
+              gravity={0.15}
+              recycle={false}
+              colors={[
+                "#fe7857",
+                "#fed757",
+                "#c1fe57",
+                "#57fe84",
+                "#57fcfe",
+                "#7157fe",
+                "#ff3ee6",
+                "#ff0075",
+              ]}
+            />
+            <h1>🎄 Merry Christmas! 🎄</h1>
+            <p>
+              Thank you for joining this vibrant journey through the story of
+              Jesus Christ. May your holiday season be filled with peace, joy,
+              and glowing memories! 🌟
+            </p>
+            <div className="buttons">
+              <button onClick={restartStory}>
+                <i className="fa-solid fa-repeat" /> Replay story
+              </button>
+            </div>
+          </animated.div>
+        )}
+      </div>
+    ) : (
+      <></>
     );
   }
 );
