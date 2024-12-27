@@ -39,7 +39,7 @@ const primitivesData = {
         defaultIntensity: 1.5,
       },
       curve3: {
-        defaultColorA: "#pink",
+        defaultColorA: "pink",
         defaultColorB: "#f75eff",
         defaultIntensity: 1,
       },
